@@ -2,35 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Happlore - Customized Travel Experiences</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happlore | Personalized Travel</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-content">
-      <h1>Welcome to Happlore</h1>
-      <p>Your Dream Trip Starts Here 🌍</p>
-      <a href="#contact" class="cta-button">Plan Your Trip</a>
-    </div>
+
+  <header class="navbar">
+    <div class="logo">Happlore</div>
+    <nav>
+      <a href="#destinations">Destinations</a>
+      <a href="#planner">Plan Your Trip</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
 
-  <section class="about">
-    <h2>What is Happlore?</h2>
-    <p>We specialize in customized travel experiences across Bali, Thailand, Europe, and beyond. Share your preferences, and we'll handle the rest!</p>
+  <section class="hero">
+    <h1>Plan Your Dream Vacation</h1>
+    <p>Discover curated trips to Bali, Europe, Thailand, and more.</p>
+    <a href="#planner"><button>Start Planning</button></a>
   </section>
 
-  <section class="form-section" id="contact">
-    <h2>Get Notified When We Launch!</h2>
+  <section id="destinations" class="destinations">
+    <h2>Popular Destinations</h2>
+    <div class="card-grid">
+      <div class="card"><img src="https://source.unsplash.com/300x200/?bali" alt="Bali"><p>Bali</p></div>
+      <div class="card"><img src="https://source.unsplash.com/300x200/?paris" alt="Paris"><p>Paris</p></div>
+      <div class="card"><img src="https://source.unsplash.com/300x200/?thailand" alt="Thailand"><p>Thailand</p></div>
+    </div>
+  </section>
+
+  <section id="planner" class="planner">
+    <h2>Plan Your Trip</h2>
     <form>
-      <input type="text" name="name" placeholder="Your Name" required />
-      <input type="email" name="email" placeholder="Your Email" required />
-      <button type="submit">Notify Me</button>
+      <input type="text" placeholder="Your Name" required />
+      <input type="email" placeholder="Email" required />
+      <select>
+        <option value="">Choose Destination</option>
+        <option>Bali</option>
+        <option>Thailand</option>
+        <option>Europe</option>
+      </select>
+      <input type="date" required />
+      <input type="number" placeholder="Travelers" min="1" required />
+      <textarea placeholder="Tell us more..."></textarea>
+      <button type="submit">Submit</button>
     </form>
   </section>
 
-  <footer>
+  <footer id="contact">
     <p>© 2025 Happlore. All rights reserved.</p>
+    <p>Contact: hello@happlore.com</p>
   </footer>
+
 </body>
 </html>
