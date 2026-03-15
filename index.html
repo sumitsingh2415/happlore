@@ -185,6 +185,20 @@
       animation: headlineFadeUp .7s ease .55s both;
     }
 
+    /* Duration selector */
+    .duration-chip {
+      transition: transform .2s, box-shadow .2s, background .2s, color .2s;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none;
+    }
+    .duration-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0,0,0,.16);
+    }
+    .duration-chip.active {
+      box-shadow: 0 12px 20px rgba(0,0,0,.24);
+    }
+
     .section { padding: 28px; max-width: 1240px; margin: 0 auto; }
     .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 4px; }
     .section-title { font-size: 20px; font-weight: 800; color: var(--dark); margin: 0; }
@@ -401,10 +415,10 @@
 <div style="border-top:1px solid #f0f0ec" class="section">
   <div class="flex items-center gap-3 flex-wrap mb-4">
     <h2 class="section-title">Packages by Duration</h2>
-    <span style="background:var(--green);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">5 Days</span>
-    <span style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">7 Days</span>
-    <span style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">10 Days</span>
-    <span style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">14+ Days</span>
+    <a href="customize.html" data-duration="5" class="duration-chip active" style="background:var(--green);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">5 Days</a>
+    <a href="customize.html" data-duration="7" class="duration-chip" style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">7 Days</a>
+    <a href="customize.html" data-duration="10" class="duration-chip" style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">10 Days</a>
+    <a href="customize.html" data-duration="14" class="duration-chip" style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">14+ Days</a>
   </div>
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Europe</p><p class="text-white/75 text-xs mt-0.5">From ₹75,000</p></div></a>
@@ -499,6 +513,7 @@
   </div>
 </footer>
 
+<script src="assets/js/state.js"></script>
 <script>
 (function() {
   // ── Cinematic Slideshow Hero ──────────────────────────────────
@@ -561,6 +576,32 @@
   const hero = document.getElementById('hero');
   hero.addEventListener('mouseenter', () => clearInterval(timer));
   hero.addEventListener('mouseleave', resetTimer);
+})();
+</script>
+
+<script>
+(function() {
+  const chips = document.querySelectorAll('.duration-chip[data-duration]');
+  if (!chips.length || !window.HapploreState) return;
+
+  function setActive(chip) {
+    chips.forEach(c => c.classList.toggle('active', c === chip));
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const duration = chip.dataset.duration;
+      if (duration) HapploreState.set('duration', duration);
+      setActive(chip);
+    });
+  });
+
+  // Highlight previously selected duration (if present)
+  const saved = HapploreState.get('duration');
+  if (saved) {
+    const match = Array.from(chips).find(c => c.dataset.duration === saved);
+    if (match) setActive(match);
+  }
 })();
 </script>
 
