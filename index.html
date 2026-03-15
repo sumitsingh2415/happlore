@@ -420,11 +420,8 @@
     <a href="customize.html" data-duration="10" class="duration-chip" style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">10 Days</a>
     <a href="customize.html" data-duration="14" class="duration-chip" style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">14+ Days</a>
   </div>
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Europe</p><p class="text-white/75 text-xs mt-0.5">From ₹75,000</p></div></a>
-    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Dubai</p><p class="text-white/75 text-xs mt-0.5">From ₹45,000</p></div></a>
-    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Bali</p><p class="text-white/75 text-xs mt-0.5">From ₹35,000</p></div></a>
-    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Maldives</p><p class="text-white/75 text-xs mt-0.5">From ₹60,000</p></div></a>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="durationGrid">
+    <!-- duration cards rendered via assets/js/duration.js -->
   </div>
 </div>
 
@@ -514,6 +511,7 @@
 </footer>
 
 <script src="assets/js/state.js"></script>
+<script src="assets/js/duration.js"></script>
 <script>
 (function() {
   // ── Cinematic Slideshow Hero ──────────────────────────────────
@@ -582,17 +580,24 @@
 <script>
 (function() {
   const chips = document.querySelectorAll('.duration-chip[data-duration]');
-  if (!chips.length || !window.HapploreState) return;
+  const grid  = document.getElementById('durationGrid');
+  if (!chips.length || !grid || !window.HapploreState) return;
 
   function setActive(chip) {
     chips.forEach(c => c.classList.toggle('active', c === chip));
   }
 
+  function renderFor(duration) {
+    DurationPackages.renderGrid(duration, grid);
+  }
+
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
       const duration = chip.dataset.duration;
-      if (duration) HapploreState.set('duration', duration);
+      if (!duration) return;
+      HapploreState.set('duration', duration);
       setActive(chip);
+      renderFor(duration);
     });
   });
 
@@ -600,7 +605,12 @@
   const saved = HapploreState.get('duration');
   if (saved) {
     const match = Array.from(chips).find(c => c.dataset.duration === saved);
-    if (match) setActive(match);
+    if (match) {
+      setActive(match);
+      renderFor(saved);
+    }
+  } else {
+    renderFor('5');
   }
 })();
 </script>
