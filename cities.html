@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Plan your perfect customised holiday with Happlore. Expert-guided packages to 60+ destinations worldwide." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – Choose Cities</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .page-content { position:relative;z-index:1;width:100%;max-width:1100px;margin:0 auto;padding:44px 24px 160px;text-align:center; }
+    .page-content h1 { font-size:26px;font-weight:700;color:var(--dark);margin:0 0 24px; }
+    .city-search-bar { display:flex;align-items:center;background:#fff;border:2px solid var(--green);border-radius:50px;padding:13px 20px;gap:12px;max-width:600px;margin:0 auto 32px;box-shadow:0 2px 16px rgba(9,179,103,.10); }
+    .city-search-bar input { flex:1;border:none;outline:none;font-family:'Manrope',sans-serif;font-size:15px;color:var(--dark);background:transparent; }
+    .city-search-bar input::placeholder { color:#aab0bc; }
+    .cities-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:20px; }
+    @media(max-width:900px){.cities-grid{grid-template-columns:repeat(2,1fr);}}
+    .city-card { background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;border:2.5px solid transparent;box-shadow:0 2px 12px rgba(0,0,0,.07);transition:border-color .2s,transform .2s,box-shadow .2s;text-align:center; }
+    .city-card:hover { transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.13); }
+    .city-card.selected { border-color:var(--green);box-shadow:0 8px 28px rgba(9,179,103,.22); }
+    .city-card-img { width:100%;height:168px;border-radius:9999px 9999px 0 0;overflow:hidden;position:relative; }
+    .city-card-img img { width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s; }
+    .city-card:hover .city-card-img img { transform:scale(1.06); }
+    .city-tick { position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--green);display:none;align-items:center;justify-content:center;z-index:2; }
+    .city-card.selected .city-tick { display:flex; }
+    .city-card-body { padding:14px 14px 16px; }
+    .city-name { font-size:15px;font-weight:700;color:var(--dark);margin:0 0 4px;line-height:1.25; }
+    .city-tagline { font-size:12px;color:#9ca3af;margin:0 0 10px;line-height:1.4; }
+    .price-badge { display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:20px;margin-bottom:10px;border:1.5px solid; }
+    .price-badge.pricey     { color:#e11d48;border-color:#fda4af;background:#fff1f2; }
+    .price-badge.affordable { color:var(--green);border-color:#86efac;background:#f0fdf4; }
+    .price-badge.moderate   { color:#d97706;border-color:#fcd34d;background:#fffbeb; }
+    .activity-tags { display:flex;flex-wrap:wrap;gap:5px;justify-content:center; }
+    .activity-tag { font-size:10px;font-weight:600;letter-spacing:.05em;color:#6b7280;background:#f3f4f6;border-radius:20px;padding:3px 8px; }
+    .no-results { grid-column:1/-1;padding:40px;color:#999;font-size:15px; }
+
+    /* ── Toast bar ── */
+    .toast-bar { position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid rgba(0,0,0,.07);padding:12px 32px;display:flex;align-items:center;gap:16px;z-index:150;transform:translateY(100%);transition:transform .3s cubic-bezier(.22,1,.36,1); }
+    .toast-bar.visible { transform:translateY(0); }
+    .toast-thumbs { display:flex;align-items:center;flex-shrink:0; }
+    .toast-thumb { width:40px;height:40px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;margin-left:-10px;box-shadow:0 1px 6px rgba(0,0,0,.15); }
+    .toast-thumb:first-child { margin-left:0; }
+    .toast-text { flex:1;font-size:14px;font-weight:500;color:var(--dark); }
+    .toast-btn-edit { background:#fff;border:1.5px solid #d1d5db;border-radius:50px;padding:10px 22px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;color:var(--dark);cursor:pointer;transition:border-color .15s;flex-shrink:0; }
+    .toast-btn-edit:hover { border-color:var(--dark); }
+    .toast-btn-build { background:var(--green);color:#fff;border:none;border-radius:50px;padding:10px 24px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0; }
+    .toast-btn-build:hover { background:var(--green-dark); }
+
+    /* ── Modal ── */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;display:none;align-items:center;justify-content:center; }
+    .modal-backdrop.open { display:flex; }
+    .modal { background:#fff;border-radius:20px;width:100%;max-width:500px;padding:32px 28px 28px;position:relative;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalIn .25s cubic-bezier(.22,1,.36,1); }
+    @keyframes modalIn { from{opacity:0;transform:scale(.95) translateY(12px)} to{opacity:1;transform:none} }
+    .modal-close { position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:background .15s; }
+    .modal-close:hover { background:#e5e7eb; }
+    .modal h2 { font-size:19px;font-weight:700;color:var(--dark);margin:0 0 4px;text-align:center; }
+    .modal-subtitle { font-size:13px;color:#9ca3af;text-align:center;margin:0 0 22px; }
+    .modal-subtitle.good { color:var(--green); }
+    .modal-city-row { display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f3f4f6; }
+    .modal-city-row:last-child { border-bottom:none; }
+    .modal-city-thumb { width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0; }
+    .modal-city-info { flex:1;text-align:left; }
+    .modal-city-name { font-size:14px;font-weight:600;color:var(--dark); }
+    .modal-city-name span { color:#9ca3af;font-weight:400; }
+    .modal-city-tagline { font-size:12px;color:#9ca3af;margin-top:2px; }
+    .modal-remove-btn { width:28px;height:28px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9ca3af;transition:border-color .15s,color .15s;flex-shrink:0; }
+    .modal-remove-btn:hover { border-color:#e11d48;color:#e11d48; }
+  </style>
+</head>
+<body class="flow-page">
+  <div id="flow-nav-mount"></div>
+  <main class="flow-body">
+    <svg class="map-watermark" viewBox="0 0 1000 500" fill="none">
+      <path d="M80 80L100 70L140 75L160 90L175 110L180 140L110 195L95 230L60 200L65 130Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M440 55L475 58L495 72L500 90L465 105L435 95Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M680 75L760 85L760 125L682 100Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+    </svg>
+    <div class="page-content">
+      <h1>Choose cities</h1>
+      <div class="city-search-bar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#aab0bc" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#aab0bc" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="citySearch" type="text" placeholder="Find a city" autocomplete="off" />
+      </div>
+      <div class="cities-grid" id="citiesGrid"></div>
+    </div>
+  </main>
+
+  <!-- Toast bar -->
+  <div class="toast-bar" id="toastBar">
+    <div class="toast-thumbs" id="toastThumbs"></div>
+    <span class="toast-text" id="toastText"></span>
+    <button class="toast-btn-edit" onclick="openModal()">Edit</button>
+    <button class="toast-btn-build" onclick="buildItinerary()">Build itinerary</button>
+  </div>
+
+  <!-- Edit modal -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <h2>Cities you will be visiting</h2>
+      <p class="modal-subtitle" id="modalSubtitle"></p>
+      <div id="modalCityList"></div>
+    </div>
+  </div>
+
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script>
+    if (!HapploreState.get('dest'))          window.location.href = 'customize.html';
+    if (!HapploreState.get('traveller'))     window.location.href = 'travellers.html';
+    if (!HapploreState.get('duration'))      window.location.href = 'duration.html';
+    if (!HapploreState.get('departureCity')) window.location.href = 'departure-city.html';
+    if (!HapploreState.get('departureDate')) window.location.href = 'departure-date.html';
+
+    FlowNav.render({ currentStep: 'cities' });
+
+    const CITY_DATA = {
+      'Switzerland': [
+        { name:'Zurich',      country:'Switzerland', tagline:'Vibrant and wealthy city',        price:'pricey',     tags:['MUST SEE','CRUISE'],      img:'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=500&q=80' },
+        { name:'Lucerne',     country:'Switzerland', tagline:'Quaint base to explore alps',     price:'pricey',     tags:['MUST SEE','CRUISE'],      img:'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=500&q=80' },
+        { name:'Interlaken',  country:'Switzerland', tagline:'Lush Greenery, skydive',          price:'pricey',     tags:['MUST SEE','ZOO'],         img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=80' },
+        { name:'Geneva',      country:'Switzerland', tagline:'For the rare and the rich',       price:'pricey',     tags:['MUST SEE','CRUISE'],      img:'https://images.unsplash.com/photo-1549144511-f099e773c147?w=500&q=80' },
+        { name:'Zermatt',     country:'Switzerland', tagline:'Toblerone Mountain',              price:'pricey',     tags:['MUST SEE','SAFARIS'],     img:'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=500&q=80' },
+        { name:'Montreux',    country:'Switzerland', tagline:'Chocloate Factory, Train Rides',  price:'pricey',     tags:['MUST SEE','TRAIN RIDES'], img:'https://images.unsplash.com/photo-1545468800-e5f70a14b810?w=500&q=80' },
+        { name:'Grindelwald', country:'Switzerland', tagline:'Grindelwald',                     price:'affordable', tags:['MUST SEE','SAFARIS'],     img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=80' },
+        { name:'Lausanne',    country:'Switzerland', tagline:'Beauty with depth',               price:'pricey',     tags:['MUST SEE','PARAGLIDING'], img:'https://images.unsplash.com/photo-1564413611394-6d54d8f61fc4?w=500&q=80' },
+        { name:'Bern',        country:'Switzerland', tagline:'Capital with old-world charm',    price:'pricey',     tags:['MUST SEE','PARAGLIDING'], img:'https://images.unsplash.com/photo-1605479725379-c3f96e55b9a1?w=500&q=80' },
+        { name:'Lugano',      country:'Switzerland', tagline:'Dazzles by a galacial lake',      price:'pricey',     tags:['CRUISE','HIKING'],        img:'https://images.unsplash.com/photo-1505261904931-b8d49b32b5b1?w=500&q=80' },
+        { name:'Basel',       country:'Switzerland', tagline:'Low cost flights hub',            price:'pricey',     tags:['MUSEUMS','THEME PARKS'],  img:'https://images.unsplash.com/photo-1558346547-4439467bd1d5?w=500&q=80' },
+        { name:'St. Moritz',  country:'Switzerland', tagline:'St Moritz',                       price:'pricey',     tags:['SKIING','LUXURY'],        img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=500&q=80' },
+        { name:'Engelberg',   country:'Switzerland', tagline:'Monastery and ski resort',        price:'moderate',   tags:['MUST SEE','SKIING'],      img:'https://images.unsplash.com/photo-1609196533988-8e68fa4da1ab?w=500&q=80' },
+        { name:'Wengen',      country:'Switzerland', tagline:'Car-free alpine village',         price:'moderate',   tags:['MUST SEE','HIKING'],      img:'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=500&q=80' },
+        { name:'Chur',        country:'Switzerland', tagline:'Martinskirche',                   price:'affordable', tags:['MUST SEE','PARAGLIDING'], img:'https://images.unsplash.com/photo-1561738428-34e1d3440c78?w=500&q=80' },
+      ],
+      'Japan': [
+        { name:'Tokyo',     country:'Japan', tagline:'The city that never sleeps',    price:'moderate',   tags:['MUST SEE','CITY TOUR'], img:'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=500&q=80' },
+        { name:'Kyoto',     country:'Japan', tagline:'Temple trails and matcha',      price:'moderate',   tags:['MUST SEE','TEMPLES'],   img:'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=500&q=80' },
+        { name:'Osaka',     country:'Japan', tagline:'Street food capital of Japan',  price:'affordable', tags:['FOOD TOUR','CASTLE'],   img:'https://images.unsplash.com/photo-1589456506629-b2ea1a6579ba?w=500&q=80' },
+        { name:'Hiroshima', country:'Japan', tagline:'History and resilience',        price:'affordable', tags:['HISTORY','MUST SEE'],   img:'https://images.unsplash.com/photo-1604328727766-a151d8e75a11?w=500&q=80' },
+        { name:'Nara',      country:'Japan', tagline:'Roam with sacred deer',         price:'affordable', tags:['MUST SEE','ZOO'],       img:'https://images.unsplash.com/photo-1599660870870-e54eef787754?w=500&q=80' },
+        { name:'Sapporo',   country:'Japan', tagline:'Snow festivals and ramen',      price:'moderate',   tags:['SKIING','FOOD TOUR'],   img:'https://images.unsplash.com/photo-1551641506-ee5bf4cb45f1?w=500&q=80' },
+      ],
+      'Dubai': [
+        { name:'Dubai',     country:'UAE', tagline:'City of superlatives',        price:'pricey',     tags:['MUST SEE','DESERT SAFARI'], img:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=500&q=80' },
+        { name:'Abu Dhabi', country:'UAE', tagline:'Grand mosques and F1',        price:'pricey',     tags:['MUST SEE','CULTURE'],       img:'https://images.unsplash.com/photo-1604580864964-0462f5d5b1a8?w=500&q=80' },
+        { name:'Sharjah',   country:'UAE', tagline:'Culture capital of the UAE',  price:'affordable', tags:['MUSEUMS','CULTURE'],        img:'https://images.unsplash.com/photo-1598867485890-4c99bf66c2b3?w=500&q=80' },
+      ],
+      'Bali': [
+        { name:'Ubud',     country:'Bali', tagline:'Arts, rice fields, wellness',    price:'affordable', tags:['MUST SEE','YOGA'],   img:'https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=500&q=80' },
+        { name:'Seminyak', country:'Bali', tagline:'Beach clubs and sunsets',        price:'moderate',   tags:['BEACH','NIGHTLIFE'], img:'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=500&q=80' },
+        { name:'Kuta',     country:'Bali', tagline:'Classic surf and party zone',    price:'affordable', tags:['SURFING','BEACH'],   img:'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=500&q=80' },
+        { name:'Nusa Dua', country:'Bali', tagline:'Resort peninsula, crystal sea',  price:'pricey',    tags:['BEACH','DIVING'],    img:'https://images.unsplash.com/photo-1559628129-67cf63b72248?w=500&q=80' },
+        { name:'Canggu',   country:'Bali', tagline:'Digital nomads and rice fields', price:'moderate',  tags:['SURFING','CAFES'],   img:'https://images.unsplash.com/photo-1573790387438-4da905039392?w=500&q=80' },
+      ],
+      'Thailand': [
+        { name:'Bangkok',    country:'Thailand', tagline:'The city of temples',          price:'affordable', tags:['MUST SEE','TEMPLES'],    img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=500&q=80' },
+        { name:'Phuket',     country:'Thailand', tagline:'Pearl of the Andaman',         price:'moderate',   tags:['BEACH','ISLAND HOP'],    img:'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=500&q=80' },
+        { name:'Chiang Mai', country:'Thailand', tagline:'Elephants and night bazaars',  price:'affordable', tags:['MUST SEE','ELEPHANTS'],  img:'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=500&q=80' },
+        { name:'Krabi',      country:'Thailand', tagline:'Limestone cliffs and caves',   price:'affordable', tags:['ISLAND HOP','KAYAKING'], img:'https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=500&q=80' },
+      ],
+      'Maldives': [
+        { name:'Malé',      country:'Maldives', tagline:'Capital & gateway atoll',    price:'moderate', tags:['MUST SEE','CULTURE'],  img:'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=500&q=80' },
+        { name:'Baa Atoll', country:'Maldives', tagline:'UNESCO Biosphere Reserve',   price:'pricey',   tags:['DIVING','SNORKELING'], img:'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=500&q=80' },
+        { name:'Ari Atoll', country:'Maldives', tagline:'Whale sharks and mantas',    price:'pricey',   tags:['DIVING','MUST SEE'],   img:'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=500&q=80' },
+      ],
+      'Europe': [
+        { name:'Paris',     country:'France',           tagline:'City of love and light',       price:'pricey',     tags:['MUST SEE','MUSEUMS'],      img:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=500&q=80' },
+        { name:'Rome',      country:'Italy',            tagline:'The eternal city',              price:'moderate',   tags:['MUST SEE','HISTORY'],      img:'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=500&q=80' },
+        { name:'Barcelona', country:'Spain',            tagline:'Gaudi and beach vibes',         price:'moderate',   tags:['MUST SEE','ARCHITECTURE'], img:'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=500&q=80' },
+        { name:'Amsterdam', country:'Netherlands',      tagline:'Canals and Van Gogh',           price:'pricey',     tags:['CRUISE','MUSEUMS'],        img:'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=500&q=80' },
+        { name:'Prague',    country:'Czech Republic',   tagline:'City of a hundred spires',      price:'affordable', tags:['MUST SEE','HISTORY'],      img:'https://images.unsplash.com/photo-1541849546-216549ae216d?w=500&q=80' },
+        { name:'Vienna',    country:'Austria',          tagline:'Imperial grandeur',             price:'moderate',   tags:['MUSEUMS','CITY TOUR'],     img:'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=500&q=80' },
+        { name:'Santorini', country:'Greece',           tagline:'Blue domes and sunsets',        price:'pricey',     tags:['MUST SEE','CRUISE'],       img:'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=500&q=80' },
+      ],
+    };
+
+    const dest     = HapploreState.get('dest') || 'Switzerland';
+    const destKey  = Object.keys(CITY_DATA).find(k => dest.toLowerCase().includes(k.toLowerCase())) || 'Switzerland';
+    const ALL_CITIES = CITY_DATA[destKey];
+
+    let selectedCities = HapploreState.get('cities') || [];
+
+    // Parse duration → { min, max }
+    function parseDuration() {
+      const d = HapploreState.get('duration') || '6-8 Days';
+      const m = d.match(/(\d+)[–\-](\d+)/);
+      return m ? { min: parseInt(m[1]), max: parseInt(m[2]) } : { min: 6, max: 8 };
+    }
+    const DUR = parseDuration();
+    const DAYS_PER_CITY = 2;
+
+    function getDaysInfo() {
+      const used    = selectedCities.length * DAYS_PER_CITY;
+      const minLeft = Math.max(0, DUR.min - used);
+      const maxLeft = Math.max(0, DUR.max - used);
+      return { used, minLeft, maxLeft };
+    }
+
+    function getToastMessage() {
+      const n = selectedCities.length;
+      if (n === 0) return '';
+      const { minLeft, maxLeft } = getDaysInfo();
+      const lastCity = selectedCities[selectedCities.length - 1];
+      if (n === 1) return `${lastCity}! Great choice, keep adding`;
+      if (maxLeft <= 0) return `Just about the right travel time.`;
+      if (minLeft === maxLeft) return `${minLeft} day${minLeft > 1 ? 's' : ''} left, keep adding`;
+      return `${minLeft} - ${maxLeft} days left, keep adding`;
+    }
+
+    function getModalSubtitle() {
+      const { minLeft, maxLeft } = getDaysInfo();
+      if (maxLeft <= 0) return { text: 'Just about the right travel time.', good: true };
+      if (minLeft === maxLeft) return { text: `${minLeft} day${minLeft > 1 ? 's' : ''} left, keep adding`, good: false };
+      return { text: `${minLeft} - ${maxLeft} days left, keep adding`, good: false };
+    }
+
+    function renderGrid(cities) {
+      const grid = document.getElementById('citiesGrid');
+      if (!cities.length) { grid.innerHTML = `<div class="no-results">No cities found.</div>`; return; }
+      grid.innerHTML = cities.map(c => {
+        const isSel = selectedCities.includes(c.name);
+        return `<div class="city-card ${isSel ? 'selected' : ''}" onclick="toggleCity('${c.name}', this)">
+          <div class="city-card-img">
+            <img src="${c.img}" alt="${c.name}" loading="lazy" />
+            <div class="city-tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="city-card-body">
+            <p class="city-name">${c.name},<br/>${c.country}</p>
+            <p class="city-tagline">${c.tagline}</p>
+            <span class="price-badge ${c.price}">${c.price.toUpperCase()}</span>
+            <div class="activity-tags">${c.tags.map(t => `<span class="activity-tag">${t}</span>`).join('')}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleCity(name, el) {
+      if (selectedCities.includes(name)) {
+        selectedCities = selectedCities.filter(c => c !== name);
+        el.classList.remove('selected');
+      } else {
+        selectedCities.push(name);
+        el.classList.add('selected');
+      }
+      HapploreState.set('cities', selectedCities);
+      updateToast();
+    }
+
+    function removeCity(name) {
+      selectedCities = selectedCities.filter(c => c !== name);
+      HapploreState.set('cities', selectedCities);
+      document.querySelectorAll('.city-card').forEach(card => {
+        const cardName = card.querySelector('.city-name').textContent.split(',')[0].trim();
+        if (cardName === name) card.classList.remove('selected');
+      });
+      updateToast();
+      renderModal();
+    }
+
+    function updateToast() {
+      const bar    = document.getElementById('toastBar');
+      const text   = document.getElementById('toastText');
+      const thumbs = document.getElementById('toastThumbs');
+      if (!selectedCities.length) { bar.classList.remove('visible'); return; }
+      bar.classList.add('visible');
+      text.textContent = getToastMessage();
+      // Stacked thumbnails — show last 3
+      const show = selectedCities.slice(-3);
+      thumbs.innerHTML = show.map(name => {
+        const city = ALL_CITIES.find(c => c.name === name);
+        return city ? `<img class="toast-thumb" src="${city.img}" alt="${name}" />` : '';
+      }).join('');
+    }
+
+    function openModal() {
+      renderModal();
+      document.getElementById('modalBackdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function handleBackdropClick(e) {
+      if (e.target === document.getElementById('modalBackdrop')) closeModal();
+    }
+
+    function renderModal() {
+      const list = document.getElementById('modalCityList');
+      const sub  = document.getElementById('modalSubtitle');
+      const { text, good } = getModalSubtitle();
+      sub.textContent = text;
+      sub.className   = 'modal-subtitle' + (good ? ' good' : '');
+      if (!selectedCities.length) {
+        list.innerHTML = `<p style="text-align:center;color:#9ca3af;padding:20px 0;font-size:14px">No cities selected yet.</p>`;
+        return;
+      }
+      list.innerHTML = selectedCities.map(name => {
+        const city = ALL_CITIES.find(c => c.name === name);
+        if (!city) return '';
+        return `<div class="modal-city-row">
+          <img class="modal-city-thumb" src="${city.img}" alt="${city.name}" />
+          <div class="modal-city-info">
+            <div class="modal-city-name">${city.name}, <span>${city.country}</span></div>
+            <div class="modal-city-tagline">${city.tagline}</div>
+          </div>
+          <button class="modal-remove-btn" onclick="removeCity('${city.name}')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    function buildItinerary() {
+      if (!selectedCities.length) return;
+      window.location.href = 'results.html';
+    }
+
+    document.getElementById('citySearch').addEventListener('input', function () {
+      const q = this.value.trim().toLowerCase();
+      const filtered = q ? ALL_CITIES.filter(c =>
+        c.name.toLowerCase().includes(q) || c.tagline.toLowerCase().includes(q) ||
+        c.tags.some(t => t.toLowerCase().includes(q))
+      ) : ALL_CITIES;
+      renderGrid(filtered);
+    });
+
+    renderGrid(ALL_CITIES);
+    updateToast();
+  </script>
+</body>
+</html>

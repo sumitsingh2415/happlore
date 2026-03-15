@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happlore – Add Activity</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css"/>
+  <style>
+    body { background:#f8f8f4; font-family:'Manrope',sans-serif; }
+
+    /* ── Layout ── */
+    .act-layout {
+      display:grid;
+      grid-template-columns:220px 1fr;
+      gap:0;
+      min-height:calc(100vh - 108px);
+    }
+    @media(max-width:768px) { .act-layout { grid-template-columns:1fr; } }
+
+    /* ── Filter sidebar ── */
+    .filter-sidebar {
+      background:#fff; border-right:1px solid #e8e8e2;
+      padding:20px 16px 120px; position:sticky;
+      top:0; height:100vh; overflow-y:auto; scrollbar-width:thin;
+    }
+    .filter-sidebar::-webkit-scrollbar { width:4px; }
+    .filter-sidebar::-webkit-scrollbar-thumb { background:#e0e0d8; border-radius:4px; }
+
+    /* PYT Recommended toggle */
+    .rec-toggle-row {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:20px;
+    }
+    .rec-label { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--dark); }
+    .toggle-switch {
+      position:relative; width:40px; height:22px; cursor:pointer;
+    }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-track {
+      position:absolute; inset:0; background:#d1d5db; border-radius:20px;
+      transition:background .2s;
+    }
+    .toggle-switch input:checked + .toggle-track { background:var(--green); }
+    .toggle-thumb {
+      position:absolute; top:3px; left:3px;
+      width:16px; height:16px; background:#fff; border-radius:50%;
+      transition:transform .2s; box-shadow:0 1px 4px rgba(0,0,0,.2);
+    }
+    .toggle-switch input:checked ~ .toggle-thumb { transform:translateX(18px); }
+
+    /* Filter sections */
+    .filter-section { margin-bottom:20px; border-top:1px solid #f0f0ec; padding-top:16px; }
+    .filter-section-title { font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+    .filter-option {
+      padding:8px 10px; border-radius:8px; font-size:13px; color:#4b5563;
+      cursor:pointer; margin-bottom:2px; transition:background .12s;
+      border:1.5px solid transparent;
+    }
+    .filter-option:hover { background:#f3f4f6; }
+    .filter-option.active { background:#f0fdf4; border-color:#86efac; color:var(--green); font-weight:600; }
+
+    /* Toggle pair (Included/Not Included, Shared/Private) */
+    .filter-toggle-pair { display:flex; gap:6px; }
+    .filter-pair-btn {
+      flex:1; text-align:center; padding:7px 0; border-radius:8px; font-size:12.5px; font-weight:600;
+      cursor:pointer; border:1.5px solid #e5e7eb; color:#6b7280; background:#fff; transition:all .15s;
+    }
+    .filter-pair-btn.active { background:#f0fdf4; border-color:#86efac; color:var(--green); }
+
+    /* Price range */
+    .price-range { margin-top:8px; }
+    .price-slider { width:100%; accent-color:var(--green); }
+    .price-range-labels { display:flex; justify-content:space-between; font-size:11.5px; color:#6b7280; margin-top:4px; }
+
+    /* ── Main content ── */
+    .act-main { padding:20px 24px 140px; }
+    .act-count { font-size:13px; color:#6b7280; margin-bottom:18px; font-weight:500; }
+    .act-count strong { color:var(--dark); }
+
+    /* Activity grid */
+    .act-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+    @media(max-width:1100px) { .act-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:700px)  { .act-grid { grid-template-columns:1fr; } }
+
+    /* Activity card */
+    .act-card {
+      background:#fff; border-radius:14px; overflow:hidden;
+      border:1.5px solid #e8e8e2;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+      transition:transform .2s, box-shadow .2s;
+    }
+    .act-card:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,.11); }
+    .act-card-img-wrap { position:relative; height:150px; }
+    .act-card-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    .act-card-rec { position:absolute; top:8px; left:8px; background:#f59e0b; color:#fff; font-size:10px; font-weight:700; letter-spacing:.04em; border-radius:5px; padding:3px 7px; }
+    .act-card-rating { position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,.65); color:#fff; font-size:11px; font-weight:700; border-radius:6px; padding:3px 7px; }
+
+    .act-card-body { padding:13px 14px 14px; }
+    .act-card-name { font-size:13px; font-weight:700; color:var(--dark); line-height:1.4; margin-bottom:4px; }
+    .act-card-meta { font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
+    .act-card-desc { font-size:11.5px; color:#6b7280; line-height:1.6; margin-bottom:10px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .act-card-footer { display:flex; align-items:center; justify-content:space-between; }
+    .act-card-price { font-size:13.5px; font-weight:800; color:var(--dark); }
+    .act-card-price small { font-size:10.5px; color:#9ca3af; font-weight:500; }
+    .act-choose { background:var(--green); color:#fff; border:none; border-radius:7px; padding:7px 15px; font-family:'Manrope',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; }
+    .act-choose:hover { background:var(--green-dark); }
+
+    /* ── Bottom bar ── */
+    .act-bottom-bar {
+      position:fixed; bottom:0; left:0; right:0; z-index:200;
+      background:#fff; border-top:1px solid #e8e8e2;
+      padding:14px 32px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .act-bar-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .act-bar-logo span { font-weight:700; font-size:15px; color:var(--dark); }
+    .act-bar-logo-dot { width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center; }
+    .act-bar-btns { display:flex; gap:12px; }
+    .act-bar-btn {
+      padding:10px 22px; border-radius:8px; font-family:'Manrope',sans-serif;
+      font-size:13.5px; font-weight:700; cursor:pointer; border:1.5px solid; transition:all .15s;
+    }
+    .act-bar-btn.change { background:#fff; border-color:#d1d5db; color:var(--dark); }
+    .act-bar-btn.change:hover { border-color:var(--dark); }
+    .act-bar-btn.back { background:var(--green); border-color:var(--green); color:#fff; display:flex;align-items:center;gap:6px; }
+    .act-bar-btn.back:hover { background:var(--green-dark); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Main layout ── -->
+  <div class="act-layout">
+
+    <!-- FILTER SIDEBAR -->
+    <div class="filter-sidebar">
+      <!-- Recommended toggle -->
+      <div class="rec-toggle-row">
+        <div class="rec-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          Recommended
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="recToggle" onchange="filterActivities()"/>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+
+      <!-- Time Slot -->
+      <div class="filter-section">
+        <div class="filter-section-title">Time slot</div>
+        <div class="filter-option" onclick="toggleFilter(this,'time')">Morning</div>
+        <div class="filter-option" onclick="toggleFilter(this,'time')">Afternoon</div>
+        <div class="filter-option" onclick="toggleFilter(this,'time')">Evening</div>
+      </div>
+
+      <!-- Activity Duration -->
+      <div class="filter-section">
+        <div class="filter-section-title">Activity Duration</div>
+        <div class="filter-option" onclick="toggleFilter(this,'duration')">Quarter Day</div>
+        <div class="filter-option" onclick="toggleFilter(this,'duration')">Half Day</div>
+        <div class="filter-option" onclick="toggleFilter(this,'duration')">Full Day</div>
+      </div>
+
+      <!-- Transfer -->
+      <div class="filter-section">
+        <div class="filter-section-title">Transfer</div>
+        <div class="filter-toggle-pair">
+          <div class="filter-pair-btn active" onclick="togglePair(this)">Included</div>
+          <div class="filter-pair-btn" onclick="togglePair(this)">Not Included</div>
+        </div>
+      </div>
+
+      <!-- Group Type -->
+      <div class="filter-section">
+        <div class="filter-section-title">Group Type</div>
+        <div class="filter-toggle-pair">
+          <div class="filter-pair-btn active" onclick="togglePair(this)">Shared</div>
+          <div class="filter-pair-btn" onclick="togglePair(this)">Private</div>
+        </div>
+      </div>
+
+      <!-- Interests -->
+      <div class="filter-section">
+        <div class="filter-section-title">Interests</div>
+        <div class="filter-option" onclick="toggleFilter(this,'interest')">Art & Culture</div>
+        <div class="filter-option" onclick="toggleFilter(this,'interest')">Adventure & Outdoor</div>
+        <div class="filter-option" onclick="toggleFilter(this,'interest')">Food & Nightlife</div>
+        <div class="filter-option" onclick="toggleFilter(this,'interest')">Shopping & Leisure</div>
+      </div>
+
+      <!-- Other filter -->
+      <div class="filter-section">
+        <div class="filter-section-title">Other filter</div>
+        <div class="filter-option" onclick="toggleFilter(this,'other')">Top Highlight</div>
+        <div class="filter-option" onclick="toggleFilter(this,'other')">Kid Friendly</div>
+        <div class="filter-option" onclick="toggleFilter(this,'other')">Fast Selling</div>
+        <div class="filter-option" onclick="toggleFilter(this,'other')">Less explored gems</div>
+        <div class="filter-option" onclick="toggleFilter(this,'other')">Self Exploration</div>
+      </div>
+
+      <!-- Price -->
+      <div class="filter-section">
+        <div class="filter-section-title">Price</div>
+        <div class="price-range">
+          <input type="range" class="price-slider" min="693" max="189411" value="189411" oninput="updatePriceLabel(this)"/>
+          <div class="price-range-labels">
+            <span>₹693</span>
+            <span id="priceMax">₹1,89,411</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY CARDS -->
+    <div class="act-main">
+      <div class="act-count" id="actCount">Showing <strong>70 of 70</strong> available</div>
+      <div class="act-grid" id="actGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── Bottom bar ── -->
+  <div class="act-bottom-bar">
+    <a href="results.html" style="text-decoration:none;display:flex;align-items:center;gap:0">
+      <span style="font-family:'Inter','DM Sans','Manrope',sans-serif;font-size:19px;font-weight:500;color:#0f0f0f;letter-spacing:-.3px">happlore</span><span style="color:#e8503a;font-size:21px;line-height:1;margin-left:1px;font-weight:700">•</span>
+    </a>
+    <div class="act-bar-btns">
+      <button class="act-bar-btn change">Change Activity</button>
+      <a href="results.html" class="act-bar-btn back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 5l-7 7 7 7" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Back to Itinerary
+      </a>
+    </div>
+  </div>
+
+  <script src="assets/js/state.js"></script>
+  <script>
+    const dest = HapploreState.get('dest') || 'Switzerland';
+    const params = new URLSearchParams(window.location.search);
+    const forCity = params.get('city') || dest;
+
+    const ALL_ACTIVITIES = [
+      { name:'Titlis Experience - Best combined with Swiss Pass', img:'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=500&q=80', duration:'Half Day', type:'Shared', time:'Morning', rating:'4.9', price:22702, interest:'Adventure & Outdoor', rec:true, desc:'At 3,062 metres, the summit offers not only a breathtaking 360 degree panorama of the Alps.' },
+      { name:'Rigi Cog Railway, The real Swiss life - Best Combined with Swiss Pass', img:'https://images.unsplash.com/photo-1595420052920-06c38fce3571?w=500&q=80', duration:'Full Day', type:'Shared', time:'Morning', rating:'5.0', price:25426, interest:'Adventure & Outdoor', rec:true, desc:'Rigi Royal Round Trip The original Swiss Mountain experience Enjoy the smooth a smooth and relaxing.' },
+      { name:'Rhinefalls, the largest waterfalls in Europe - Best combined with Swiss Pass', img:'https://images.unsplash.com/photo-1559564484-ffe7ce64a29d?w=500&q=80', duration:'Half Day', type:'Shared', time:'Afternoon', rating:'4.8', price:25426, interest:'Adventure & Outdoor', rec:true, desc:'A magnificent tour from Zurich to Constance by train where you can take the Rhine cruise.' },
+      { name:'Zurich in the Mirror of the Past: Self-Guided Reading Tour', img:'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Morning', rating:'4.5', price:693, interest:'Art & Culture', rec:false, desc:'Explore all of Zurich\'s main tourist sights, discover enchanting houses, and others.' },
+      { name:'The Dark Side of Zurich: Self-Guided Audio City Tour', img:'https://images.unsplash.com/photo-1573108724029-4c46571d6490?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Evening', rating:'4.4', price:1387, interest:'Art & Culture', rec:false, desc:'Explore the dark side of Zurich as your audio guide tells you about historical curiosities.' },
+      { name:'Zurich: Black Light Galaxy Minigolf', img:'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Evening', rating:'4.4', price:2135, interest:'Food & Nightlife', rec:false, desc:'Discover Zurich, an innovative mini-golf destination in Zurich.' },
+      { name:'Zurich: Virtual Reality Space Racing Simulator', img:'https://images.unsplash.com/photo-1527095721427-e538d9da41af?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Afternoon', rating:'5.0', price:2219, interest:'Adventure & Outdoor', rec:false, desc:'Experience VR racing like never before! Race from your own seat through immersive virtual worlds.' },
+      { name:'Zurich: Virtual Reality Arena', img:'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=500&q=80', duration:'Quarter Day', type:'Private', time:'Evening', rating:'3.8', price:2773, interest:'Food & Nightlife', rec:false, desc:'Immerse yourself in Virtual Reality adventure, battling zombies, engaging in team challenges.' },
+      { name:'Zurich: E-Bike City Tour', img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Morning', rating:'4.9', price:3466, interest:'Adventure & Outdoor', rec:false, desc:'Explore the most beautiful corners of the city by electric bike, allowing you to move effortlessly.' },
+      { name:'Zürich Card: Save on Attractions, Transport, and Dining', img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Morning', rating:'4.5', price:4020, interest:'Shopping & Leisure', rec:false, desc:'Experience all the hottest and uses at the same time with a Zürich Card that is valid for either.' },
+      { name:'Zurich: Lindt Home of Chocolate Guided Tour & Entry Ticket', img:'https://images.unsplash.com/photo-1614094082869-cd4e4b2905c7?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Afternoon', rating:'4.8', price:4160, interest:'Food & Nightlife', rec:false, desc:'Explore the Lindt Home of Chocolate in Zurich on a guided tour. Learn everything there is to know.' },
+      { name:'Hidden Zurich walk Free photo Vintage Train Hill River View', img:'https://images.unsplash.com/photo-1594122230689-7a26b3b4a456?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Morning', rating:'4.5', price:4436, interest:'Art & Culture', rec:false, desc:'Discover the secret side of Zürich! FREE photo shoot by Sony Camera as you explore.' },
+      { name:'Zurich: City Top Attractions Tour by Bus with Audio Guide', img:'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Morning', rating:'4.3', price:6714, interest:'Art & Culture', rec:false, desc:'Climb aboard a colorful bus and discover Zurich on this fully narrated audio tour through the city.' },
+      { name:'Zurich: ZVV 1-Day Pass with Unlimited Zone 110 & 121 Travel', img:'https://images.unsplash.com/photo-1595420052920-06c38fce3571?w=500&q=80', duration:'Quarter Day', type:'Shared', time:'Morning', rating:'4.5', price:5001, interest:'Shopping & Leisure', rec:false, desc:'Enjoy unlimited travel on all types of transportation to explore the center of Zurich.' },
+    ];
+
+    let activeFilters = { time:null, duration:null, interest:null, other:null, rec:false };
+
+    function filterActivities() {
+      activeFilters.rec = document.getElementById('recToggle').checked;
+      let filtered = ALL_ACTIVITIES.filter(a => {
+        if (activeFilters.rec && !a.rec) return false;
+        if (activeFilters.time && a.time !== activeFilters.time) return false;
+        if (activeFilters.duration && a.duration !== activeFilters.duration) return false;
+        if (activeFilters.interest && a.interest !== activeFilters.interest) return false;
+        return true;
+      });
+      renderActivities(filtered);
+    }
+
+    function renderActivities(acts) {
+      document.getElementById('actCount').innerHTML = `Showing <strong>${acts.length} of ${ALL_ACTIVITIES.length}</strong> available`;
+      document.getElementById('actGrid').innerHTML = acts.map(a => `
+        <div class="act-card">
+          <div class="act-card-img-wrap">
+            <img src="${a.img}" alt="${a.name}" loading="lazy"/>
+            ${a.rec ? '<div class="act-card-rec">⚡ PYT RECOMMENDED</div>' : ''}
+            <div class="act-card-rating">⭐ ${a.rating}</div>
+          </div>
+          <div class="act-card-body">
+            <div class="act-card-name">${a.name}</div>
+            <div class="act-card-meta">${a.duration} · ${a.type}</div>
+            <div class="act-card-desc">${a.desc}</div>
+            <div class="act-card-footer">
+              <div class="act-card-price">▲ ₹${a.price.toLocaleString('en-IN')} <small>pp</small></div>
+              <button class="act-choose" onclick="chooseActivity('${a.name}')">Choose</button>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    function toggleFilter(el, group) {
+      const options = el.parentElement.querySelectorAll('.filter-option');
+      const wasActive = el.classList.contains('active');
+      options.forEach(o => o.classList.remove('active'));
+      if (!wasActive) { el.classList.add('active'); activeFilters[group] = el.textContent.trim(); }
+      else { activeFilters[group] = null; }
+      filterActivities();
+    }
+
+    function togglePair(el) {
+      el.parentElement.querySelectorAll('.filter-pair-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function updatePriceLabel(slider) {
+      document.getElementById('priceMax').textContent = '₹' + parseInt(slider.value).toLocaleString('en-IN');
+    }
+
+    function chooseActivity(name) {
+      HapploreState.set('lastChosenActivity', name);
+      window.location.href = 'results.html';
+    }
+
+    // Initial render
+    renderActivities(ALL_ACTIVITIES);
+  </script>
+</body>
+</html>

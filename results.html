@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happlore – Your Itinerary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css"/>
+  <style>
+    :root { --sidebar-w: 300px; }
+    body { background:#f8f8f4; font-family:'Manrope',sans-serif; padding-top:0; }
+
+    /* ── Top sticky header ── */
+    .results-header {
+      position:sticky; top:0; z-index:200;
+      background:#fff; border-bottom:1px solid #e8e8e2;
+      box-shadow:0 1px 8px rgba(0,0,0,.06);
+    }
+    .rh-top {
+      max-width:1240px; margin:0 auto;
+      padding:0 24px;
+      display:flex; align-items:center; justify-content:space-between;
+      height:54px;
+    }
+    .rh-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .rh-logo span { font-weight:800; font-size:17px; color:var(--dark); }
+    .rh-logo-dot { width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center; }
+
+    .rh-tabs { display:flex; align-items:center; gap:0; }
+    .rh-tab {
+      padding:0 22px; height:54px; display:flex; align-items:center;
+      font-size:13.5px; font-weight:600; color:#6b7280; cursor:pointer;
+      border-bottom:3px solid transparent; transition:color .15s,border-color .15s;
+      text-decoration:none;
+    }
+    .rh-tab.active { color:var(--green); border-color:var(--green); }
+    .rh-tab:hover:not(.active) { color:var(--dark); }
+
+    .rh-price-pill {
+      background:var(--green); color:#fff; border-radius:8px;
+      padding:6px 16px; font-size:14px; font-weight:700; cursor:pointer;
+    }
+
+    /* ── Sub-tabs (Flight, Hotel, etc) ── */
+    .sub-tabs-bar {
+      background:#fff; border-bottom:1px solid #e8e8e2;
+      display:flex; align-items:center; gap:0;
+      padding:0 24px; overflow-x:auto; scrollbar-width:none;
+    }
+    .sub-tabs-bar::-webkit-scrollbar { display:none; }
+    .sub-tab {
+      display:flex; align-items:center; gap:7px;
+      padding:12px 18px; font-size:13px; font-weight:600;
+      color:#6b7280; cursor:pointer; white-space:nowrap;
+      border-bottom:2.5px solid transparent; transition:color .15s, border-color .15s;
+    }
+    .sub-tab.active { color:var(--green); border-color:var(--green); }
+    .sub-tab:hover:not(.active) { color:var(--dark); }
+
+    /* ── Layout: left content + right sidebar ── */
+    .results-layout {
+      max-width:1240px; margin:0 auto;
+      padding:28px 24px 60px;
+      display:grid;
+      grid-template-columns:1fr var(--sidebar-w);
+      gap:28px;
+      align-items:start;
+    }
+    @media(max-width:1000px) { .results-layout { grid-template-columns:1fr; } }
+
+    /* ── Section headers ── */
+    .section-head {
+      font-size:17px; font-weight:800; color:var(--dark);
+      margin:28px 0 14px; display:flex; align-items:center; gap:10px;
+    }
+    .section-head .icon { font-size:18px; }
+
+    /* ── Why block ── */
+    .why-block {
+      background:#fff; border-radius:14px; padding:18px 22px;
+      border:1px solid #e8e8e2; margin-bottom:20px;
+    }
+    .why-block h3 { font-size:14px; font-weight:800; color:var(--dark); margin:0 0 12px; }
+    .why-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .why-item { display:flex; align-items:flex-start; gap:10px; }
+    .why-item-icon { font-size:18px; flex-shrink:0; margin-top:2px; }
+    .why-item-text { font-size:12px; color:#6b7280; line-height:1.5; }
+    .why-item-text strong { color:var(--dark); display:block; font-size:13px; margin-bottom:1px; }
+
+    /* ── Itinerary day card ── */
+    .itin-city-block { margin-bottom:18px; }
+    .itin-city-header {
+      display:flex; align-items:center; justify-content:space-between;
+      background:linear-gradient(135deg, #f0fdf4, #e8f5e9);
+      border:1px solid #c8e6c9; border-radius:12px 12px 0 0;
+      padding:12px 16px; cursor:pointer;
+    }
+    .itin-city-name { font-size:14px; font-weight:800; color:var(--dark); }
+    .itin-city-meta { font-size:12px; color:#6b7280; margin-top:2px; }
+    .itin-city-nights {
+      background:var(--green); color:#fff;
+      border-radius:6px; padding:3px 10px;
+      font-size:11px; font-weight:700;
+    }
+    .itin-days { background:#fff; border:1px solid #e8e8e2; border-top:none; border-radius:0 0 12px 12px; overflow:hidden; }
+
+    .itin-day {
+      padding:14px 16px; border-bottom:1px solid #f0f0ec;
+    }
+    .itin-day:last-child { border-bottom:none; }
+    .itin-day-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .itin-day-label { font-size:13px; font-weight:700; color:var(--dark); }
+    .itin-day-date { font-size:12px; color:#9ca3af; }
+
+    /* Activity row inside a day */
+    .itin-activity {
+      display:flex; align-items:flex-start; gap:12px;
+      padding:10px 12px; border-radius:10px; margin-bottom:8px;
+      border:1px solid #f0f0ec; background:#fafaf8;
+      position:relative;
+    }
+    .itin-activity:last-child { margin-bottom:0; }
+    .itin-activity-img { width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .itin-activity-info { flex:1; min-width:0; }
+    .itin-activity-time { font-size:11px; color:#9ca3af; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+    .itin-activity-name { font-size:13px; font-weight:700; color:var(--dark); margin:2px 0; }
+    .itin-activity-meta { font-size:11.5px; color:#6b7280; }
+    .itin-activity-actions {
+      display:flex; gap:6px; flex-shrink:0;
+    }
+    .act-btn {
+      font-size:11px; font-weight:600; border-radius:6px;
+      padding:5px 10px; border:1.5px solid; cursor:pointer;
+      transition:all .15s; white-space:nowrap; background:#fff;
+    }
+    .act-btn.swap { color:var(--green); border-color:#86efac; }
+    .act-btn.swap:hover { background:#f0fdf4; }
+    .act-btn.remove { color:#e11d48; border-color:#fda4af; }
+    .act-btn.remove:hover { background:#fff1f2; }
+    .act-btn.add { color:var(--green); border-color:#86efac; background:var(--green); color:#fff; }
+    .act-btn.add:hover { background:var(--green-dark); }
+
+    .add-activity-row {
+      display:flex; align-items:center; justify-content:center;
+      padding:10px 0 4px;
+      gap:8px; cursor:pointer; color:var(--green); font-size:12.5px; font-weight:600;
+    }
+    .add-activity-row:hover { opacity:.75; }
+
+    /* ── Hotels ── */
+    .hotel-card {
+      background:#fff; border-radius:14px; border:1px solid #e8e8e2;
+      overflow:hidden; margin-bottom:16px;
+    }
+    .hotel-img { width:100%; height:180px; object-fit:cover; }
+    .hotel-body { padding:14px 16px; }
+    .hotel-name { font-size:14px; font-weight:800; color:var(--dark); }
+    .hotel-loc { font-size:12px; color:#9ca3af; margin:2px 0 8px; }
+    .hotel-rating { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .hotel-stars { color:#f59e0b; font-size:12px; }
+    .hotel-rating-score { font-size:12px; color:#6b7280; }
+    .hotel-amenities { display:flex; flex-wrap:wrap; gap:6px; }
+    .hotel-amenity { font-size:11px; color:#6b7280; background:#f3f4f6; border-radius:20px; padding:3px 9px; }
+    .hotel-footer {
+      padding:12px 16px; border-top:1px solid #f0f0ec;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .hotel-nights { font-size:12px; color:#9ca3af; }
+    .hotel-change-btn { font-size:12px; font-weight:600; color:var(--green); cursor:pointer; }
+
+    /* ── Transfer / Tour cards ── */
+    .transfer-card {
+      background:#fff; border-radius:12px; border:1px solid #e8e8e2;
+      padding:14px 16px; margin-bottom:12px;
+      display:flex; align-items:center; gap:14px;
+    }
+    .transfer-card img { width:80px; height:56px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .transfer-info { flex:1; }
+    .transfer-name { font-size:13px; font-weight:700; color:var(--dark); }
+    .transfer-meta { font-size:12px; color:#9ca3af; margin-top:2px; }
+    .transfer-price { font-size:13px; font-weight:700; color:var(--green); flex-shrink:0; }
+
+    /* ── Activity cards (bottom section) ── */
+    .activity-card {
+      background:#fff; border-radius:14px; border:1px solid #e8e8e2;
+      overflow:hidden; margin-bottom:16px;
+    }
+    .activity-card-img-wrap { position:relative; height:160px; }
+    .activity-card-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+    .activity-rating-badge {
+      position:absolute; bottom:10px; left:10px;
+      background:rgba(0,0,0,.65); color:#fff;
+      border-radius:6px; padding:3px 8px;
+      font-size:11px; font-weight:700;
+    }
+    .activity-badge-rec {
+      position:absolute; top:10px; left:10px;
+      background:#f59e0b; color:#fff;
+      border-radius:6px; padding:3px 8px;
+      font-size:10px; font-weight:700; letter-spacing:.04em;
+    }
+    .activity-body { padding:14px 16px; }
+    .activity-name { font-size:13.5px; font-weight:700; color:var(--dark); margin-bottom:4px; }
+    .activity-meta { font-size:11.5px; color:#9ca3af; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
+    .activity-desc { font-size:12px; color:#6b7280; line-height:1.6; margin-bottom:10px; }
+    .activity-footer { display:flex; align-items:center; justify-content:space-between; }
+    .activity-price { font-size:14px; font-weight:800; color:var(--dark); }
+    .activity-price small { font-size:11px; color:#9ca3af; font-weight:500; }
+    .choose-btn {
+      background:var(--green); color:#fff; border:none;
+      border-radius:8px; padding:8px 18px;
+      font-family:'Manrope',sans-serif; font-size:13px; font-weight:700;
+      cursor:pointer; transition:background .15s;
+    }
+    .choose-btn:hover { background:var(--green-dark); }
+
+    /* ── Sticky price sidebar ── */
+    .price-sidebar { position:sticky; top:110px; }
+    .price-card {
+      background:#fff; border-radius:16px; border:1px solid #e8e8e2;
+      box-shadow:0 4px 20px rgba(0,0,0,.07); overflow:hidden;
+    }
+    .price-card-header { background:var(--green); padding:16px 20px; }
+    .price-total { font-size:24px; font-weight:800; color:#fff; }
+    .price-per { font-size:12px; color:rgba(255,255,255,.8); margin-top:2px; }
+    .price-card-body { padding:16px 20px; }
+    .price-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f0f0ec; font-size:13px; }
+    .price-row:last-child { border-bottom:none; }
+    .price-row .label { color:#6b7280; }
+    .price-row .val { font-weight:700; color:var(--dark); }
+    .book-btn {
+      width:100%; background:var(--green); color:#fff; border:none;
+      border-radius:10px; padding:14px; font-family:'Manrope',sans-serif;
+      font-size:15px; font-weight:800; cursor:pointer; margin-top:14px;
+      transition:background .15s;
+    }
+    .book-btn:hover { background:var(--green-dark); }
+    .price-disclaimer { font-size:11px; color:#9ca3af; text-align:center; margin-top:10px; line-height:1.5; }
+
+    /* Trip summary pills in sidebar */
+    .trip-pills { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+    .trip-pill { font-size:11.5px; font-weight:600; color:#6b7280; background:#f3f4f6; border-radius:20px; padding:4px 10px; }
+
+    /* Expert card */
+    .expert-card {
+      background:linear-gradient(135deg,#f0fdf4,#e8f5e9);
+      border:1px solid #c8e6c9; border-radius:12px; padding:14px 16px; margin-top:14px;
+    }
+    .expert-card h4 { font-size:13px; font-weight:700; color:var(--dark); margin:0 0 4px; }
+    .expert-card p { font-size:12px; color:#6b7280; margin:0 0 10px; line-height:1.5; }
+    .expert-btn {
+      width:100%; background:var(--green); color:#fff; border:none;
+      border-radius:8px; padding:10px; font-family:'Manrope',sans-serif;
+      font-size:13px; font-weight:700; cursor:pointer;
+    }
+
+    /* Transfer text-only rows */
+    .transfer-text-row {
+      padding:12px 0; border-bottom:1px solid #f0f0ec;
+      font-size:13px; color:var(--dark);
+    }
+    .transfer-text-row:last-child { border-bottom:none; }
+    .transfer-text-row .meta { font-size:11.5px; color:#9ca3af; margin-top:2px; }
+
+    /* Connecting arrow between cities */
+    .city-connector {
+      display:flex; align-items:center; gap:10px; padding:10px 16px;
+      font-size:12px; color:#9ca3af;
+    }
+    .city-connector-line { flex:1; height:1px; background:#e8e8e2; border-top:1px dashed #d1d5db; }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Header ── -->
+<div class="results-header">
+  <div class="rh-top">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;gap:0">
+      <span style="font-family:'Inter','DM Sans','Manrope',sans-serif;font-size:20px;font-weight:500;color:#0f0f0f;letter-spacing:-.3px">happlore</span><span style="color:#e8503a;font-size:22px;line-height:1;margin-left:1px;font-weight:700">•</span>
+    </a>
+    <div class="rh-tabs">
+      <a class="rh-tab active" href="#itinerary">Your Trip</a>
+      <a class="rh-tab" href="#inclusions">Inclusions</a>
+      <a class="rh-tab" href="#reviews">Reviews</a>
+    </div>
+    <div class="rh-price-pill" id="headerPrice">₹3,92,258</div>
+  </div>
+  <div class="sub-tabs-bar">
+    <div class="sub-tab active">✈️ Flight</div>
+    <div class="sub-tab">🏨 Hotel</div>
+    <div class="sub-tab">🚗 Transfers</div>
+    <div class="sub-tab">🎯 Activities</div>
+  </div>
+</div>
+
+<!-- ── Main Layout ── -->
+<div class="results-layout" id="itinerary">
+  <!-- LEFT CONTENT -->
+  <div>
+
+    <!-- Page title -->
+    <div style="margin-bottom:20px">
+      <h1 id="pageTitle" style="font-size:22px;font-weight:800;color:var(--dark);margin:0 0 6px"></h1>
+      <p id="pageSubtitle" style="font-size:13px;color:#6b7280;margin:0"></p>
+    </div>
+
+    <!-- Why Happlore -->
+    <div class="why-block">
+      <h3>Why choose Happlore?</h3>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="why-item-icon">🏆</div>
+          <div class="why-item-text"><strong>1 Million+ Holidays</strong>Crafted for travellers like you</div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon">⭐</div>
+          <div class="why-item-text"><strong>1,00,000+ Reviews</strong>Real experiences, real ratings</div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon">🎯</div>
+          <div class="why-item-text"><strong>Expert In-Destination</strong>On-ground support 24x7</div>
+        </div>
+        <div class="why-item">
+          <div class="why-item-icon">💬</div>
+          <div class="why-item-text"><strong>24/7 Support</strong>We're here whenever you need us</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ITINERARY ── -->
+    <div id="itinerarySection"></div>
+
+    <!-- ── HOTELS ── -->
+    <div id="hotelSection">
+      <div class="section-head"><span class="icon">🏨</span> Hotels</div>
+      <div id="hotelCards"></div>
+    </div>
+
+    <!-- ── TRANSFERS ── -->
+    <div id="transferSection">
+      <div class="section-head"><span class="icon">🚗</span> Transfers</div>
+      <div id="transferCards"></div>
+    </div>
+
+    <!-- ── TOURS ── -->
+    <div id="toursSection">
+      <div class="section-head"><span class="icon">🚞</span> Tours</div>
+      <div id="tourCards"></div>
+    </div>
+
+    <!-- ── ACTIVITIES ── -->
+    <div id="activitiesSection">
+      <div class="section-head"><span class="icon">🎯</span> Activities</div>
+      <div id="activityCards"></div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="price-sidebar">
+    <div class="price-card">
+      <div class="price-card-header">
+        <div class="price-total" id="sidebarPrice">₹3,92,258</div>
+        <div class="price-per">for 2 travellers · all inclusive</div>
+      </div>
+      <div class="price-card-body">
+        <div class="trip-pills" id="tripPills"></div>
+        <div class="price-row"><span class="label">✈️ Flights</span><span class="val">₹82,000</span></div>
+        <div class="price-row"><span class="label">🏨 Hotels</span><span class="val">₹1,68,000</span></div>
+        <div class="price-row"><span class="label">🎯 Activities</span><span class="val">₹44,000</span></div>
+        <div class="price-row"><span class="label">🚗 Transfers</span><span class="val">₹28,258</span></div>
+        <div class="price-row"><span class="label">🚞 Tours</span><span class="val">₹70,000</span></div>
+        <button class="book-btn">Book this holiday →</button>
+        <p class="price-disclaimer">International flights not included · EMI from ₹32,688/mo</p>
+      </div>
+    </div>
+
+    <div class="expert-card">
+      <h4>🧑‍💼 Talk to a Travel Expert</h4>
+      <p>Get this itinerary reviewed and customised by our destination specialists.</p>
+      <button class="expert-btn">Chat with Expert</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/state.js"></script>
+<script>
+  // ── Read state ──
+  const dest      = HapploreState.get('dest') || 'Switzerland';
+  const cities    = HapploreState.get('cities') || ['Zurich', 'Interlaken', 'Lucerne'];
+  const duration  = HapploreState.get('duration') || '6-8 Days';
+  const traveller = HapploreState.get('traveller') || 'couple';
+  const depCity   = HapploreState.get('departureCity') || { city: 'Bengaluru', code: 'BLR' };
+  const depDate   = HapploreState.get('departureDate');
+
+  // Parse duration
+  function parseDur(d) { const m = d.match(/(\d+)[–\-](\d+)/); return m ? { min:parseInt(m[1]), max:parseInt(m[2]) } : {min:6,max:8}; }
+  const DUR = parseDur(duration);
+  const nights = Math.round((DUR.min + DUR.max) / 2) - 1;
+
+  // Format departure date
+  function fmtDate(ds, addDays=0) {
+    const d = ds ? new Date(ds + 'T00:00:00') : new Date(Date.now() + 30*86400000);
+    d.setDate(d.getDate() + addDays);
+    return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  // City data
+  const CITY_DATA = {
+    'Zurich':      { img:'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=600&q=80', country:'Switzerland' },
+    'Lucerne':     { img:'https://images.unsplash.com/photo-1527095721427-e538d9da41af?w=600&q=80', country:'Switzerland' },
+    'Interlaken':  { img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80', country:'Switzerland' },
+    'Geneva':      { img:'https://images.unsplash.com/photo-1559564484-ffe7ce64a29d?w=600&q=80', country:'Switzerland' },
+    'Zermatt':     { img:'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=600&q=80', country:'Switzerland' },
+    'Montreux':    { img:'https://images.unsplash.com/photo-1595420052920-06c38fce3571?w=600&q=80', country:'Switzerland' },
+    'Grindelwald': { img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80', country:'Switzerland' },
+    'Bern':        { img:'https://images.unsplash.com/photo-1573108724029-4c46571d6490?w=600&q=80', country:'Switzerland' },
+    'Lausanne':    { img:'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80', country:'Switzerland' },
+    'Tokyo':       { img:'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=80', country:'Japan' },
+    'Kyoto':       { img:'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80', country:'Japan' },
+    'Osaka':       { img:'https://images.unsplash.com/photo-1589456506629-b2ea1a6579ba?w=600&q=80', country:'Japan' },
+    'Dubai':       { img:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=80', country:'UAE' },
+    'Bali':        { img:'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=80', country:'Indonesia' },
+    'Bangkok':     { img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&q=80', country:'Thailand' },
+    'Paris':       { img:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80', country:'France' },
+    'Rome':        { img:'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&q=80', country:'Italy' },
+  };
+
+  const ACTIVITIES = [
+    { name:'Lake Brienz Cruise – Evening Tour – Best combined with Swiss Pass', img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=80', duration:'Half Day', type:'Shared', rating:'4.8', price:'₹22,702', rec:true },
+    { name:'Top of Europe – Jungfraujoch with Return Train from Interlaken', img:'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=500&q=80', duration:'Full Day', type:'Shared', rating:'4.9', price:'₹18,500', rec:true },
+    { name:'Rhine Falls – Most Scenic Waterfall in Europe – Swiss Pass', img:'https://images.unsplash.com/photo-1559564484-ffe7ce64a29d?w=500&q=80', duration:'Half Day', type:'Shared', rating:'4.7', price:'₹14,200', rec:false },
+    { name:'Schilthorn Skyline Panorama – Cable Car to 360° View', img:'https://images.unsplash.com/photo-1595420052920-06c38fce3571?w=500&q=80', duration:'Half Day', type:'Shared', rating:'4.6', price:'₹16,800', rec:false },
+  ];
+
+  const HOTELS = [
+    { name:'Hotel de la Paix', loc:'City Center', stars:'★★★★', rating:'8.6 Excellent', nights:2, img:'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&q=80', amenities:['WiFi','Breakfast','Air Conditioning','Swimming Pool'] },
+    { name:'Grand Hotel Panorama', loc:'Mountain View', stars:'★★★★★', rating:'9.1 Superb', nights:3, img:'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&q=80', amenities:['WiFi','Breakfast','Spa','Airport Transfer'] },
+  ];
+
+  // ── Distribute nights across cities ──
+  function buildDayPlan() {
+    const nighsPerCity = Math.max(1, Math.floor(nights / cities.length));
+    let plan = [];
+    let dayNum = 0;
+    cities.forEach((city, ci) => {
+      const cityNights = (ci === cities.length - 1) ? (nights - nighsPerCity * ci) : nighsPerCity;
+      for (let n = 0; n < cityNights; n++) {
+        dayNum++;
+        const dateStr = fmtDate(HapploreState.get('departureDate'), dayNum - 1);
+        plan.push({ city, day: dayNum, date: dateStr, cityIndex: ci, nightIndex: n, cityNights });
+      }
+    });
+    return plan;
+  }
+
+  const dayPlan = buildDayPlan();
+
+  // ── Title ──
+  document.getElementById('pageTitle').textContent = `${nights} nights in ${cities.join(', ')}`;
+  document.getElementById('pageSubtitle').textContent = `${fmtDate(HapploreState.get('departureDate'))} · ${DUR.min}-${DUR.max} days · ${traveller.charAt(0).toUpperCase()+traveller.slice(1)} · From ${depCity.city||depCity}`;
+
+  // ── Trip pills ──
+  const pills = [dest, duration, (depCity.code||depCity), cities.length + ' Cities'];
+  document.getElementById('tripPills').innerHTML = pills.map(p => `<span class="trip-pill">${p}</span>`).join('');
+
+  // ── Build itinerary by city groups ──
+  function buildItinerary() {
+    const daysGrouped = {};
+    dayPlan.forEach(d => {
+      if (!daysGrouped[d.city]) daysGrouped[d.city] = [];
+      daysGrouped[d.city].push(d);
+    });
+
+    let html = '';
+    cities.forEach(city => {
+      const days = daysGrouped[city] || [];
+      if (!days.length) return;
+      const info = CITY_DATA[city] || { img:'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=600&q=80', country:dest };
+      const nightLabel = days.length === 1 ? '1 Night' : `${days.length} Nights`;
+
+      const daysHTML = days.map((d, i) => {
+        const acts = i === 0
+          ? `<div class="itin-activity">
+               <img class="itin-activity-img" src="${info.img}" alt=""/>
+               <div class="itin-activity-info">
+                 <div class="itin-activity-time">Morning</div>
+                 <div class="itin-activity-name">Arrive in ${city} & Hotel Check-in</div>
+                 <div class="itin-activity-meta">Transfer from ${depCity.city || 'Airport'} · Settle in</div>
+               </div>
+             </div>
+             <div class="itin-activity">
+               <img class="itin-activity-img" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80" alt=""/>
+               <div class="itin-activity-info">
+                 <div class="itin-activity-time">Afternoon</div>
+                 <div class="itin-activity-name">City Orientation Walk – ${city}</div>
+                 <div class="itin-activity-meta">Half Day · Guided · Included</div>
+               </div>
+               <div class="itin-activity-actions">
+                 <button class="act-btn swap" onclick="swapActivity('${city}', ${d.day})">Swap</button>
+                 <button class="act-btn remove" onclick="removeActivity(this)">✕</button>
+               </div>
+             </div>`
+          : `<div class="itin-activity">
+               <img class="itin-activity-img" src="${ACTIVITIES[i % ACTIVITIES.length].img}" alt=""/>
+               <div class="itin-activity-info">
+                 <div class="itin-activity-time">Full Day</div>
+                 <div class="itin-activity-name">${ACTIVITIES[i % ACTIVITIES.length].name}</div>
+                 <div class="itin-activity-meta">${ACTIVITIES[i % ACTIVITIES.length].duration} · ${ACTIVITIES[i % ACTIVITIES.length].type}</div>
+               </div>
+               <div class="itin-activity-actions">
+                 <button class="act-btn swap" onclick="swapActivity('${city}', ${d.day})">Swap</button>
+                 <button class="act-btn remove" onclick="removeActivity(this)">✕</button>
+               </div>
+             </div>`;
+
+        return `<div class="itin-day">
+          <div class="itin-day-header">
+            <span class="itin-day-label">Day ${d.day}</span>
+            <span class="itin-day-date">${d.date}</span>
+          </div>
+          ${acts}
+          <div class="add-activity-row" onclick="addActivity('${city}', ${d.day})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            Add activity
+          </div>
+        </div>`;
+      }).join('');
+
+      html += `<div class="itin-city-block">
+        <div class="itin-city-header">
+          <div>
+            <div class="itin-city-name">${city}, ${info.country}</div>
+            <div class="itin-city-meta">${days[0].date} – ${days[days.length-1].date}</div>
+          </div>
+          <span class="itin-city-nights">${nightLabel}</span>
+        </div>
+        <div class="itin-days">${daysHTML}</div>
+      </div>`;
+
+      if (cities.indexOf(city) < cities.length - 1) {
+        const nextCity = cities[cities.indexOf(city) + 1];
+        html += `<div class="city-connector">
+          <div class="city-connector-line"></div>
+          <span style="white-space:nowrap;font-size:12px;color:#9ca3af">🚂 Transfer to ${nextCity}</span>
+          <div class="city-connector-line"></div>
+        </div>`;
+      }
+    });
+    document.getElementById('itinerarySection').innerHTML = html;
+  }
+
+  // ── Hotels ──
+  function buildHotels() {
+    document.getElementById('hotelCards').innerHTML = HOTELS.slice(0, Math.min(cities.length, 2)).map((h, i) => `
+      <div class="hotel-card">
+        <img class="hotel-img" src="${h.img}" alt="${h.name}" />
+        <div class="hotel-body">
+          <div class="hotel-name">${h.name}</div>
+          <div class="hotel-loc">📍 ${cities[i] || cities[0]}, ${dest}</div>
+          <div class="hotel-rating">
+            <span class="hotel-stars">${h.stars}</span>
+            <span class="hotel-rating-score">${h.rating}</span>
+          </div>
+          <div class="hotel-amenities">
+            ${h.amenities.map(a => `<span class="hotel-amenity">${a}</span>`).join('')}
+          </div>
+        </div>
+        <div class="hotel-footer">
+          <span class="hotel-nights">${h.nights} Nights · Accommodation Only</span>
+          <span class="hotel-change-btn">Change Hotel</span>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Transfers ──
+  function buildTransfers() {
+    const transfers = [];
+    cities.forEach((city, i) => {
+      if (i < cities.length - 1) transfers.push({ from: city, to: cities[i+1], type:'Train', img:'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=200&q=80' });
+    });
+    transfers.push({ from: cities[cities.length-1], to: (depCity.city||'Airport'), type:'Car Transfer', img:'https://images.unsplash.com/photo-1617816743396-4cd574bced0a?w=200&q=80' });
+
+    document.getElementById('transferCards').innerHTML = transfers.map(t => `
+      <div class="transfer-card">
+        <img src="${t.img}" alt="" />
+        <div class="transfer-info">
+          <div class="transfer-name">${t.from} to ${t.to}</div>
+          <div class="transfer-meta">${t.type} · Seat Included</div>
+        </div>
+        <div class="transfer-price">Included</div>
+      </div>`).join('');
+  }
+
+  // ── Tours ──
+  function buildTours() {
+    const tours = [
+      { name:`Grindelwald to ${cities[0] || 'Zurich'} – Scenic Mountain Express`, img:'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=400&q=80', dur:'3h 45m', price:'₹8,713', rating:'4.7' },
+      { name:`${cities[0] || 'Zurich'} to ${cities[cities.length-1] || 'Engelberg'}`, img:'https://images.unsplash.com/photo-1595420052920-06c38fce3571?w=400&q=80', dur:'2h 10m', price:'₹5,280', rating:'4.5' },
+    ];
+    document.getElementById('tourCards').innerHTML = tours.map(t => `
+      <div class="transfer-card">
+        <img src="${t.img}" alt="" style="width:90px;height:62px;border-radius:8px;object-fit:cover;flex-shrink:0"/>
+        <div class="transfer-info">
+          <div class="transfer-name">${t.name}</div>
+          <div class="transfer-meta">🕐 ${t.dur} · ⭐ ${t.rating}</div>
+        </div>
+        <div class="transfer-price">${t.price}</div>
+      </div>`).join('');
+  }
+
+  // ── Activities ──
+  function buildActivities() {
+    document.getElementById('activityCards').innerHTML = ACTIVITIES.map(a => `
+      <div class="activity-card">
+        <div class="activity-card-img-wrap">
+          <img src="${a.img}" alt="${a.name}" />
+          ${a.rec ? '<div class="activity-badge-rec">⚡ RECOMMENDED</div>' : ''}
+          <div class="activity-rating-badge">⭐ ${a.rating}</div>
+        </div>
+        <div class="activity-body">
+          <div class="activity-name">${a.name}</div>
+          <div class="activity-meta">${a.duration} · ${a.type}</div>
+          <div class="activity-footer">
+            <div class="activity-price">▲ ${a.price} <small>per person</small></div>
+            <button class="choose-btn">Choose</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Actions ──
+  function swapActivity(city, day) {
+    window.location.href = `activities.html?city=${encodeURIComponent(city)}&day=${day}`;
+  }
+  function addActivity(city, day) {
+    window.location.href = `activities.html?city=${encodeURIComponent(city)}&day=${day}&mode=add`;
+  }
+  function removeActivity(btn) {
+    const row = btn.closest('.itin-activity');
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(10px)';
+    row.style.transition = 'all .25s';
+    setTimeout(() => row.remove(), 250);
+  }
+
+  // ── Init ──
+  buildItinerary();
+  buildHotels();
+  buildTransfers();
+  buildTours();
+  buildActivities();
+</script>
+</body>
+</html>

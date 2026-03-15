@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Plan your perfect customised holiday with Happlore. Expert-guided packages to 60+ destinations worldwide." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – Duration of Holiday</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .page-content {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 900px;
+      margin: 0 auto;
+      padding: 64px 24px 140px;
+      text-align: center;
+    }
+    .page-content h1 {
+      font-size: 28px; font-weight: 700;
+      color: var(--dark); margin: 0 0 44px;
+    }
+
+    /* ── Duration cards grid ── */
+    .duration-grid {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .duration-card {
+      width: 175px;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2.5px solid transparent;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .duration-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.13);
+    }
+    .duration-card.selected {
+      border-color: var(--green);
+      box-shadow: 0 8px 28px rgba(9,179,103,.22);
+    }
+
+    /* Arch-top illustration area */
+    .duration-card-img {
+      width: 100%;
+      height: 180px;
+      border-radius: 9999px 9999px 0 0;
+      background: #f5f4ef;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Oval shadow under luggage */
+    .luggage-shadow {
+      position: absolute;
+      bottom: 18px;
+      left: 50%; transform: translateX(-50%);
+      width: 80px; height: 10px;
+      background: rgba(0,0,0,0.10);
+      border-radius: 50%;
+      filter: blur(3px);
+    }
+
+    .luggage-wrap {
+      position: relative; z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .duration-card-label {
+      padding: 16px 8px 18px;
+      font-size: 16px; font-weight: 600;
+      color: var(--dark); text-align: center;
+    }
+
+    /* Selected tick */
+    .card-tick-badge {
+      position: absolute; top: 10px; right: 10px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--green);
+      display: none; align-items: center; justify-content: center;
+      z-index: 2;
+    }
+    .duration-card.selected .card-tick-badge { display: flex; }
+  </style>
+</head>
+<body class="flow-page">
+
+  <!-- Nav injected by nav.js -->
+  <div id="flow-nav-mount"></div>
+
+  <main class="flow-body">
+    <!-- World map watermark -->
+    <svg class="map-watermark" viewBox="0 0 1000 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M80 80L100 70L140 75L160 90L175 110L180 140L170 160L150 175L110 195L95 230L75 235L60 200L55 180L65 130Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M440 55L475 58L495 72L500 90L465 105L435 95Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M450 130L510 140L520 195L490 280L432 215L440 160Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M680 75L760 85L760 125L682 100Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M710 280L808 285L818 335L706 300Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+    </svg>
+
+    <div class="page-content">
+      <h1>What's the duration of your holiday?</h1>
+
+      <div class="duration-grid">
+
+        <!-- 3–5 Days: 1 small suitcase -->
+        <div class="duration-card" id="dur-3-5" onclick="selectDuration('3-5 Days', this)">
+          <div class="duration-card-img">
+            <div class="card-tick-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="luggage-shadow"></div>
+            <div class="luggage-wrap">
+              <!-- Single green carry-on -->
+              <svg width="62" height="88" viewBox="0 0 62 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Handle -->
+                <rect x="22" y="2" width="18" height="10" rx="4" stroke="#1a7a4a" stroke-width="3" fill="none"/>
+                <!-- Body -->
+                <rect x="6" y="14" width="50" height="62" rx="8" fill="#1db065"/>
+                <!-- Zipper line -->
+                <line x1="31" y1="14" x2="31" y2="76" stroke="#169952" stroke-width="2.5" stroke-dasharray="4 3"/>
+                <!-- Horizontal stripes -->
+                <rect x="6" y="35" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <rect x="6" y="52" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <!-- Wheels -->
+                <circle cx="16" cy="79" r="5" fill="#0d5c35"/>
+                <circle cx="46" cy="79" r="5" fill="#0d5c35"/>
+                <!-- Lock -->
+                <rect x="24" y="42" width="14" height="10" rx="3" fill="#0d5c35"/>
+                <circle cx="31" cy="44" r="3" fill="#1db065"/>
+              </svg>
+            </div>
+          </div>
+          <div class="duration-card-label">3-5 Days</div>
+        </div>
+
+        <!-- 6–8 Days: green + yellow suitcase -->
+        <div class="duration-card" id="dur-6-8" onclick="selectDuration('6-8 Days', this)">
+          <div class="duration-card-img">
+            <div class="card-tick-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="luggage-shadow" style="width:100px"></div>
+            <div class="luggage-wrap" style="gap:6px">
+              <!-- Green larger suitcase -->
+              <svg width="58" height="84" viewBox="0 0 62 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="22" y="2" width="18" height="10" rx="4" stroke="#1a7a4a" stroke-width="3" fill="none"/>
+                <rect x="6" y="14" width="50" height="62" rx="8" fill="#1db065"/>
+                <line x1="31" y1="14" x2="31" y2="76" stroke="#169952" stroke-width="2.5" stroke-dasharray="4 3"/>
+                <rect x="6" y="35" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <rect x="6" y="52" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <circle cx="16" cy="79" r="5" fill="#0d5c35"/>
+                <circle cx="46" cy="79" r="5" fill="#0d5c35"/>
+                <rect x="24" y="42" width="14" height="10" rx="3" fill="#0d5c35"/>
+                <circle cx="31" cy="44" r="3" fill="#1db065"/>
+              </svg>
+              <!-- Yellow smaller suitcase -->
+              <svg width="46" height="70" viewBox="0 0 52 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="18" y="2" width="16" height="8" rx="3" stroke="#b8860b" stroke-width="2.5" fill="none"/>
+                <rect x="4" y="12" width="44" height="52" rx="7" fill="#f5c842"/>
+                <line x1="26" y1="12" x2="26" y2="64" stroke="#d4a800" stroke-width="2" stroke-dasharray="4 3"/>
+                <rect x="4" y="29" width="44" height="3.5" rx="1.5" fill="#d4a800" opacity="0.5"/>
+                <rect x="4" y="44" width="44" height="3.5" rx="1.5" fill="#d4a800" opacity="0.5"/>
+                <circle cx="13" cy="68" r="4" fill="#b8860b"/>
+                <circle cx="39" cy="68" r="4" fill="#b8860b"/>
+                <rect x="19" y="35" width="14" height="9" rx="3" fill="#b8860b"/>
+                <circle cx="26" cy="37" r="2.5" fill="#f5c842"/>
+              </svg>
+            </div>
+          </div>
+          <div class="duration-card-label">6-8 Days</div>
+        </div>
+
+        <!-- 8–10 Days: green + black suitcase -->
+        <div class="duration-card" id="dur-8-10" onclick="selectDuration('8-10 Days', this)">
+          <div class="duration-card-img">
+            <div class="card-tick-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="luggage-shadow" style="width:106px"></div>
+            <div class="luggage-wrap" style="gap:6px">
+              <!-- Green suitcase -->
+              <svg width="58" height="84" viewBox="0 0 62 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="22" y="2" width="18" height="10" rx="4" stroke="#1a7a4a" stroke-width="3" fill="none"/>
+                <rect x="6" y="14" width="50" height="62" rx="8" fill="#1db065"/>
+                <line x1="31" y1="14" x2="31" y2="76" stroke="#169952" stroke-width="2.5" stroke-dasharray="4 3"/>
+                <rect x="6" y="35" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <rect x="6" y="52" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <circle cx="16" cy="79" r="5" fill="#0d5c35"/>
+                <circle cx="46" cy="79" r="5" fill="#0d5c35"/>
+                <rect x="24" y="42" width="14" height="10" rx="3" fill="#0d5c35"/>
+                <circle cx="31" cy="44" r="3" fill="#1db065"/>
+              </svg>
+              <!-- Black suitcase -->
+              <svg width="50" height="76" viewBox="0 0 56 82" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="19" y="2" width="18" height="9" rx="3" stroke="#444" stroke-width="2.5" fill="none"/>
+                <rect x="4" y="13" width="48" height="58" rx="8" fill="#2d2d2d"/>
+                <!-- Ribs -->
+                <rect x="4" y="25" width="48" height="3" rx="1.5" fill="#444"/>
+                <rect x="4" y="35" width="48" height="3" rx="1.5" fill="#444"/>
+                <rect x="4" y="52" width="48" height="3" rx="1.5" fill="#444"/>
+                <rect x="4" y="62" width="48" height="3" rx="1.5" fill="#444"/>
+                <!-- Center zip -->
+                <line x1="28" y1="13" x2="28" y2="71" stroke="#444" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <circle cx="13" cy="74" r="4.5" fill="#111"/>
+                <circle cx="43" cy="74" r="4.5" fill="#111"/>
+                <rect x="20" y="37" width="16" height="10" rx="3" fill="#111"/>
+                <circle cx="28" cy="39.5" r="2.5" fill="#2d2d2d"/>
+              </svg>
+            </div>
+          </div>
+          <div class="duration-card-label">8-10 Days</div>
+        </div>
+
+        <!-- 10–12 Days: yellow + green + black (3 bags) -->
+        <div class="duration-card" id="dur-10-12" onclick="selectDuration('10-12 Days', this)">
+          <div class="duration-card-img">
+            <div class="card-tick-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="luggage-shadow" style="width:120px"></div>
+            <div class="luggage-wrap" style="gap:3px;align-items:flex-end">
+              <!-- Yellow (small, back-left) -->
+              <svg width="38" height="58" viewBox="0 0 52 76" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:0px">
+                <rect x="18" y="2" width="16" height="8" rx="3" stroke="#b8860b" stroke-width="2.5" fill="none"/>
+                <rect x="4" y="12" width="44" height="52" rx="7" fill="#f5c842"/>
+                <line x1="26" y1="12" x2="26" y2="64" stroke="#d4a800" stroke-width="2" stroke-dasharray="4 3"/>
+                <rect x="4" y="29" width="44" height="3.5" rx="1.5" fill="#d4a800" opacity="0.5"/>
+                <rect x="4" y="44" width="44" height="3.5" rx="1.5" fill="#d4a800" opacity="0.5"/>
+                <circle cx="13" cy="68" r="4" fill="#b8860b"/>
+                <circle cx="39" cy="68" r="4" fill="#b8860b"/>
+              </svg>
+              <!-- Green (tallest, center) -->
+              <svg width="52" height="80" viewBox="0 0 62 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="22" y="2" width="18" height="10" rx="4" stroke="#1a7a4a" stroke-width="3" fill="none"/>
+                <rect x="6" y="14" width="50" height="62" rx="8" fill="#1db065"/>
+                <line x1="31" y1="14" x2="31" y2="76" stroke="#169952" stroke-width="2.5" stroke-dasharray="4 3"/>
+                <rect x="6" y="35" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <rect x="6" y="52" width="50" height="4" rx="2" fill="#169952" opacity="0.5"/>
+                <circle cx="16" cy="79" r="5" fill="#0d5c35"/>
+                <circle cx="46" cy="79" r="5" fill="#0d5c35"/>
+                <rect x="24" y="42" width="14" height="10" rx="3" fill="#0d5c35"/>
+                <circle cx="31" cy="44" r="3" fill="#1db065"/>
+              </svg>
+              <!-- Black (medium, right) -->
+              <svg width="42" height="66" viewBox="0 0 56 82" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="19" y="2" width="18" height="9" rx="3" stroke="#444" stroke-width="2.5" fill="none"/>
+                <rect x="4" y="13" width="48" height="58" rx="8" fill="#2d2d2d"/>
+                <rect x="4" y="25" width="48" height="3" rx="1.5" fill="#444"/>
+                <rect x="4" y="35" width="48" height="3" rx="1.5" fill="#444"/>
+                <rect x="4" y="52" width="48" height="3" rx="1.5" fill="#444"/>
+                <rect x="4" y="62" width="48" height="3" rx="1.5" fill="#444"/>
+                <line x1="28" y1="13" x2="28" y2="71" stroke="#444" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <circle cx="13" cy="74" r="4.5" fill="#111"/>
+                <circle cx="43" cy="74" r="4.5" fill="#111"/>
+              </svg>
+            </div>
+          </div>
+          <div class="duration-card-label">10-12 Days</div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Testimonial strip injected by testimonial.js -->
+  <div id="testimonial-mount"></div>
+
+  <!-- Shared JS -->
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/testimonial.js"></script>
+
+  <script>
+    // Guard: redirect back if previous steps not completed
+    if (!HapploreState.get('dest'))       window.location.href = 'customize.html';
+    if (!HapploreState.get('traveller'))  window.location.href = 'travellers.html';
+
+    // ── Render shared components ──
+    FlowNav.render({ currentStep: 'duration' });
+
+    Testimonial.render({
+      avatar: 'B', avatarBg: '#5b4fcf',
+      text: '"PYT truly helped us from A to Z in planning and executing our recent Europe trip covering Switzerland, Finland, and Paris. Everything was taken care of..."',
+      name: 'Bharani Tharan, Switzerland',
+      rating: '4.6 / 5', reviewCount: '8400+',
+    });
+
+    // ── Restore previous selection ──
+    const saved = HapploreState.get('duration');
+    const idMap  = { '3-5 Days': 'dur-3-5', '6-8 Days': 'dur-6-8', '8-10 Days': 'dur-8-10', '10-12 Days': 'dur-10-12' };
+    if (saved && idMap[saved]) {
+      document.getElementById(idMap[saved]).classList.add('selected');
+    }
+
+    // ── Select duration ──
+    function selectDuration(label, el) {
+      HapploreState.set('duration', label);
+      document.querySelectorAll('.duration-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      // Advance to next step
+      setTimeout(() => { window.location.href = 'departure-city.html'; }, 320);
+    }
+  </script>
+</body>
+</html>

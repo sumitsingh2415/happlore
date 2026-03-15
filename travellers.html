@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Plan your perfect customised holiday with Happlore. Expert-guided packages to 60+ destinations worldwide." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – Who Are You Travelling With?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .page-content {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 860px;
+      margin: 0 auto;
+      padding: 64px 24px 140px;
+      text-align: center;
+    }
+    .page-content h1 {
+      font-size: 28px; font-weight: 700;
+      color: var(--dark); margin: 0 0 8px;
+    }
+    .page-sub {
+      font-size: 14px; color: #6b7280; margin: 0 0 40px;
+    }
+
+    /* ── New traveller card grid ── */
+    .tc-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      justify-items: center;
+    }
+    @media (max-width: 600px) {
+      .tc-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .tc-card {
+      width: 100%;
+      border-radius: 22px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      aspect-ratio: 3/4;
+      border: 3px solid transparent;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, border-color .2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,.10);
+    }
+    .tc-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+    }
+    .tc-card.selected {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(9,179,103,.18), 0 12px 32px rgba(0,0,0,.14);
+    }
+
+    /* Background photo layer */
+    .tc-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: transform .4s ease;
+    }
+    .tc-card:hover .tc-bg { transform: scale(1.06); }
+
+    /* Gradient overlay — stronger at bottom */
+    .tc-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,.04) 0%,
+        rgba(0,0,0,.08) 40%,
+        rgba(0,0,0,.68) 100%
+      );
+    }
+
+    /* Colour tint on left edge — unique per card */
+    .tc-tint {
+      position: absolute; inset: 0;
+      opacity: .22;
+      mix-blend-mode: color;
+    }
+
+    /* Content */
+    .tc-body {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 18px 20px;
+    }
+    .tc-emoji {
+      font-size: 42px;
+      line-height: 1;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,.3));
+      transition: transform .25s;
+    }
+    .tc-card:hover .tc-emoji { transform: scale(1.15) rotate(-4deg); }
+    .tc-card.selected .tc-emoji { transform: scale(1.18); }
+
+    .tc-name {
+      font-size: 18px; font-weight: 800;
+      color: #fff; letter-spacing: -.2px;
+      text-shadow: 0 2px 10px rgba(0,0,0,.4);
+      margin-bottom: 4px;
+    }
+    .tc-mood {
+      font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,.72);
+      text-shadow: 0 1px 6px rgba(0,0,0,.4);
+    }
+
+    /* Selected tick badge */
+    .tc-tick {
+      position: absolute; top: 14px; right: 14px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--green);
+      display: none; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(9,179,103,.4);
+    }
+    .tc-card.selected .tc-tick { display: flex; }
+
+    /* Honeymoon spans last row — centered */
+    .tc-honeymoon-wrap {
+      grid-column: 1 / -1;
+      display: flex; justify-content: center;
+    }
+    .tc-honeymoon-wrap .tc-card {
+      max-width: 280px;
+    }
+  </style>
+</head>
+<body class="flow-page">
+
+  <!-- Nav injected by nav.js -->
+  <div id="flow-nav-mount"></div>
+
+  <main class="flow-body">
+    <!-- World map watermark -->
+    <svg class="map-watermark" viewBox="0 0 1000 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M80 80L100 70L140 75L160 90L175 110L180 140L170 160L150 175L110 195L95 230L75 235L60 200L55 180L65 130Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M440 55L475 58L495 72L500 90L465 105L435 95Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M450 130L510 140L520 195L490 280L432 215L440 160Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M680 75L760 85L760 125L682 100Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+    </svg>
+
+    <div class="page-content">
+      <h1>Who are you travelling with?</h1>
+      <p class="page-sub">Pick your travel style and we'll craft the perfect itinerary</p>
+
+      <div class="tc-grid">
+
+        <!-- Couple -->
+        <div class="tc-card" id="card-couple" onclick="selectTraveller('couple', this)">
+          <div class="tc-bg" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=85')"></div>
+          <div class="tc-overlay"></div>
+          <div class="tc-tint" style="background:#f43f6e"></div>
+          <div class="tc-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="tc-body">
+            <div class="tc-emoji">💑</div>
+            <div class="tc-name">Couple</div>
+            <div class="tc-mood">Romance & shared sunsets</div>
+          </div>
+        </div>
+
+        <!-- Family -->
+        <div class="tc-card" id="card-family" onclick="selectTraveller('family', this)">
+          <div class="tc-bg" style="background-image:url('https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&q=85')"></div>
+          <div class="tc-overlay"></div>
+          <div class="tc-tint" style="background:#f97316"></div>
+          <div class="tc-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="tc-body">
+            <div class="tc-emoji">👨‍👩‍👧‍👦</div>
+            <div class="tc-name">Family</div>
+            <div class="tc-mood">Memories for everyone</div>
+          </div>
+        </div>
+
+        <!-- Friends -->
+        <div class="tc-card" id="card-friends" onclick="selectTraveller('friends', this)">
+          <div class="tc-bg" style="background-image:url('https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=800&q=85')"></div>
+          <div class="tc-overlay"></div>
+          <div class="tc-tint" style="background:#a855f7"></div>
+          <div class="tc-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="tc-body">
+            <div class="tc-emoji">🧑‍🤝‍🧑</div>
+            <div class="tc-name">Friends</div>
+            <div class="tc-mood">Good vibes, great stories</div>
+          </div>
+        </div>
+
+        <!-- Solo -->
+        <div class="tc-card" id="card-solo" onclick="selectTraveller('solo', this)">
+          <div class="tc-bg" style="background-image:url('https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=800&q=85')"></div>
+          <div class="tc-overlay"></div>
+          <div class="tc-tint" style="background:#3b82f6"></div>
+          <div class="tc-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="tc-body">
+            <div class="tc-emoji">🧳</div>
+            <div class="tc-name">Solo</div>
+            <div class="tc-mood">Your pace, your rules</div>
+          </div>
+        </div>
+
+        <!-- Honeymoon — centered, spans full row -->
+        <div class="tc-honeymoon-wrap">
+          <div class="tc-card" id="card-honeymoon" onclick="selectTraveller('honeymoon', this)">
+            <div class="tc-bg" style="background-image:url('https://images.unsplash.com/photo-1518623489648-a173ef7824f3?w=800&q=85')"></div>
+            <div class="tc-overlay"></div>
+            <div class="tc-tint" style="background:#09b367"></div>
+            <div class="tc-tick"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="tc-body">
+              <div class="tc-emoji">💍</div>
+              <div class="tc-name">Honeymoon</div>
+              <div class="tc-mood">Begin forever in paradise</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Testimonial strip injected by testimonial.js -->
+  <div id="testimonial-mount"></div>
+
+  <!-- Shared JS -->
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/testimonial.js"></script>
+
+  <script>
+    // Guard: redirect to customize if no destination chosen yet
+    if (!HapploreState.get('dest')) {
+      window.location.href = 'customize.html';
+    }
+
+    // ── Render shared components ──
+    FlowNav.render({ currentStep: 'travellers' });
+
+    Testimonial.render({
+      avatar: 'B', avatarBg: '#5b4fcf',
+      text: '"Happlore truly helped us from A to Z — our Europe trip covering Switzerland, Finland, and Paris was perfectly planned. Everything was taken care of..."',
+      name: 'Bharani Tharan, Switzerland',
+      rating: '4.6 / 5', reviewCount: '8250+',
+    });
+
+    // ── Restore previous selection ──
+    const saved = HapploreState.get('traveller');
+    if (saved) {
+      const el = document.getElementById('card-' + saved);
+      if (el) el.classList.add('selected');
+    }
+
+    // ── Select traveller type ──
+    function selectTraveller(type, el) {
+      HapploreState.set('traveller', type);
+      document.querySelectorAll('.tc-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      setTimeout(() => { window.location.href = 'duration.html'; }, 320);
+    }
+  </script>
+</body>
+</html>

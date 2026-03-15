@@ -2,58 +2,605 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Happlore | Personalized Travel</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – Craft Your Holiday</title>
+  <meta name="description" content="Plan your perfect holiday with Happlore. Customised international holiday packages for couples, families, solo travellers and groups. 60+ destinations, 4.8★ rated."/>
+  <meta property="og:title" content="Happlore – Craft Your Holiday"/>
+  <meta property="og:description" content="Plan your dream holiday with expert guidance. Customised packages to 60+ destinations worldwide."/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    /* ── Home-only styles ── */
+    .home-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(0,0,0,.22); backdrop-filter: blur(10px);
+      height: 56px; display: flex; align-items: center;
+    }
+    .home-nav-inner {
+      width: 100%; max-width: 1240px; margin: 0 auto;
+      padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+    }
+    /* ── Cinematic Slideshow Hero ── */
+    #hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+
+    /* Slides */
+    .slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.4s ease-in-out;
+      transform: scale(1.08);
+      animation: none;
+    }
+    .slide.active {
+      opacity: 1;
+      animation: kenburns 8s ease-in-out forwards;
+    }
+    .slide.exit {
+      opacity: 0;
+      transition: opacity 1.4s ease-in-out;
+    }
+    @keyframes kenburns {
+      from { transform: scale(1.08); }
+      to   { transform: scale(1.00); }
+    }
+
+    /* Dark gradient over slide */
+    #hero-gradient {
+      position: absolute; inset: 0; z-index: 2;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,.18) 0%,
+        rgba(0,0,0,.10) 35%,
+        rgba(0,0,0,.52) 75%,
+        rgba(0,0,0,.72) 100%
+      );
+    }
+
+    /* Content layer */
+    #hero-content {
+      position: absolute; inset: 0; z-index: 3;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 56px 24px 40px;
+      text-align: center;
+    }
+
+    /* Destination tag pill that changes with slide */
+    #hero-dest-tag {
+      display: inline-flex; align-items: center; gap-8px;
+      background: rgba(255,255,255,.12); backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(255,255,255,.22);
+      border-radius: 50px; padding: 6px 18px;
+      color: #fff; font-size: 12px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      margin-bottom: 18px;
+      animation: tagFadeIn .6s ease both;
+    }
+    @keyframes tagFadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Main headline */
+    #hero-headline {
+      font-family: 'Paytone One', sans-serif;
+      font-size: clamp(32px, 6vw, 72px);
+      color: #fff;
+      line-height: 1.08;
+      margin: 0 0 10px;
+      text-shadow: 0 2px 24px rgba(0,0,0,.4);
+      animation: headlineFadeUp .7s ease .1s both;
+    }
+    @keyframes headlineFadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Subheadline — changes per slide */
+    #hero-sub {
+      font-size: clamp(14px, 2vw, 18px);
+      color: rgba(255,255,255,.82);
+      font-weight: 500;
+      margin: 0 0 32px;
+      animation: headlineFadeUp .7s ease .2s both;
+    }
+
+    /* Search bar */
+    .hero-search {
+      display: flex; align-items: center; background: #fff;
+      border-radius: 50px; padding: 10px 10px 10px 18px; gap: 10px;
+      box-shadow: 0 6px 32px rgba(0,0,0,.25);
+      max-width: 460px; width: 100%; margin: 0 auto 28px; cursor: pointer;
+      animation: headlineFadeUp .7s ease .3s both;
+    }
+    .hero-search input {
+      flex: 1; border: none; outline: none;
+      font-family: 'Manrope', sans-serif; font-size: 14px;
+      color: var(--dark); background: transparent; cursor: pointer;
+    }
+
+    /* Traveller chips */
+    /* ── Traveller type cards ── */
+    .tcard {
+      display: flex; flex-direction: column; align-items: center;
+      text-decoration: none; border-radius: 18px; padding: 14px 18px 12px;
+      min-width: 82px; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s ease;
+      box-shadow: 0 4px 18px rgba(0,0,0,.22);
+    }
+    .tcard::before {
+      content: ''; position: absolute; inset: 0;
+      background: inherit; filter: brightness(1.12);
+      opacity: 0; transition: opacity .2s;
+      border-radius: inherit;
+    }
+    .tcard:hover { transform: translateY(-5px) scale(1.04); box-shadow: 0 12px 32px rgba(0,0,0,.32); }
+    .tcard:hover::before { opacity: 1; }
+    .tcard-icon { font-size: 32px; line-height: 1; margin-bottom: 7px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.2)); }
+    .tcard-label { color: #fff; font-size: 11.5px; font-weight: 800; letter-spacing: .03em; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,.3); }
+
+    /* Bottom dots nav */
+    #hero-dots {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 4; display: flex; gap: 8px;
+    }
+    .hero-dot {
+      width: 28px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,.35); cursor: pointer;
+      transition: background .3s, width .3s;
+    }
+    .hero-dot.active {
+      background: #fff; width: 44px;
+    }
+
+    /* Scroll cue */
+    #hero-scroll-cue {
+      position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
+      z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+    #hero-scroll-cue span { font-size: 11px; color: rgba(255,255,255,.5); letter-spacing:.06em; }
+
+    /* Chips row fade-in */
+    #chips-row {
+      animation: headlineFadeUp .7s ease .45s both;
+      gap: 10px;
+    }
+    .trust-row {
+      animation: headlineFadeUp .7s ease .55s both;
+    }
+
+    .section { padding: 28px; max-width: 1240px; margin: 0 auto; }
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 4px; }
+    .section-title { font-size: 20px; font-weight: 800; color: var(--dark); margin: 0; }
+    .scroll-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; margin-top: 16px; scrollbar-width: none; }
+    .scroll-row::-webkit-scrollbar { display: none; }
+    .arch-card { flex-shrink: 0; border-radius: 9999px 9999px 16px 16px; overflow: hidden; position: relative; cursor: pointer; transition: transform .3s, box-shadow .3s; }
+    .arch-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,.22); }
+    .arch-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+    .arch-card:hover img { transform: scale(1.06); }
+    .arch-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 65%); padding: 18px 12px 14px; }
+    .dest-card { flex-shrink: 0; border-radius: 14px; overflow: hidden; position: relative; cursor: pointer; transition: transform .25s; }
+    .dest-card:hover { transform: translateY(-3px); }
+    .dest-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s; }
+    .dest-card:hover img { transform: scale(1.07); }
+    .dest-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 55%); display: flex; align-items: flex-end; padding: 12px; }
+    .gram-phone { border-radius: 26px; overflow: hidden; background: #1f2937; box-shadow: 0 20px 50px rgba(0,0,0,.5); flex-shrink: 0; }
+    .why-grid { max-width: 1240px; margin: 16px auto 0; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .why-card { border-radius: 16px; overflow: hidden; position: relative; height: 155px; }
+    .play-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.28); display: flex; align-items: center; justify-content: center; }
+    .play-circle { width: 44px; height: 44px; background: rgba(255,255,255,.92); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  </style>
 </head>
 <body>
 
-  <header class="navbar">
-    <div class="logo">Happlore</div>
-    <nav>
-      <a href="#destinations">Destinations</a>
-      <a href="#planner">Plan Your Trip</a>
-      <a href="#contact">Contact</a>
+<!-- ── Navbar ── -->
+<header class="home-nav">
+  <div class="home-nav-inner">
+    <a href="index.html" class="flex items-center gap-2 no-underline">
+      <span style="font-family:'Inter','DM Sans','Manrope',sans-serif;font-size:20px;font-weight:700;color:#fff;letter-spacing:-.3px">happlore</span><span style="color:#09b367;font-size:22px;line-height:1;margin-left:1px;font-weight:700">•</span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-white/80">
+      <a href="customize.html" class="hover:text-white cursor-pointer no-underline text-white/80">International Holidays</a>
+      <a href="customize.html" class="hover:text-white cursor-pointer no-underline text-white/80">Honeymoon</a>
+      <a href="customize.html" class="hover:text-white text-white">Plan Your Trip</a>
     </nav>
-  </header>
-
-  <section class="hero">
-    <h1>Plan Your Dream Vacation</h1>
-    <p>Discover curated trips to Bali, Europe, Thailand, and more.</p>
-    <a href="#planner"><button>Start Planning</button></a>
-  </section>
-
-  <section id="destinations" class="destinations">
-    <h2>Popular Destinations</h2>
-    <div class="card-grid">
-      <div class="card"><img src="https://source.unsplash.com/300x200/?bali" alt="Bali"><p>Bali</p></div>
-      <div class="card"><img src="https://source.unsplash.com/300x200/?paris" alt="Paris"><p>Paris</p></div>
-      <div class="card"><img src="https://source.unsplash.com/300x200/?thailand" alt="Thailand"><p>Thailand</p></div>
+    <div class="flex items-center gap-3">
+      <a href="customize.html" class="text-white/80 text-sm font-medium hover:text-white hidden lg:block no-underline">Login</a>
+      <a href="customize.html" class="text-sm font-semibold px-4 py-2 rounded-full text-white no-underline" style="background:var(--green)">Talk to Expert</a>
     </div>
-  </section>
+  </div>
+</header>
 
-  <section id="planner" class="planner">
-    <h2>Plan Your Trip</h2>
-    <form>
-      <input type="text" placeholder="Your Name" required />
-      <input type="email" placeholder="Email" required />
-      <select>
-        <option value="">Choose Destination</option>
-        <option>Bali</option>
-        <option>Thailand</option>
-        <option>Europe</option>
-      </select>
-      <input type="date" required />
-      <input type="number" placeholder="Travelers" min="1" required />
-      <textarea placeholder="Tell us more..."></textarea>
-      <button type="submit">Submit</button>
-    </form>
-  </section>
+<!-- ── Cinematic Slideshow Hero ── -->
+<div id="hero">
 
-  <footer id="contact">
-    <p>© 2025 Happlore. All rights reserved.</p>
-    <p>Contact: hello@happlore.com</p>
-  </footer>
+  <!-- Slides (Ken Burns + crossfade) -->
+  <div class="slide" data-dest="Santorini, Greece" data-sub="Where whitewashed dreams meet the Aegean Sea"
+    style="background-image:url('https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1600&q=85')"></div>
+  <div class="slide" data-dest="Kyoto, Japan" data-sub="Ancient temples, cherry blossoms, timeless serenity"
+    style="background-image:url('https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=1600&q=85')"></div>
+  <div class="slide" data-dest="Maldives" data-sub="Overwater bliss in the world's most turquoise waters"
+    style="background-image:url('https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1600&q=85')"></div>
+  <div class="slide" data-dest="Swiss Alps" data-sub="Snow-capped peaks and fairy-tale alpine villages"
+    style="background-image:url('https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1600&q=85')"></div>
+  <div class="slide" data-dest="Bali, Indonesia" data-sub="Sacred terraces, tropical temples, soul-stirring sunsets"
+    style="background-image:url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1600&q=85')"></div>
+
+  <!-- Gradient overlay -->
+  <div id="hero-gradient"></div>
+
+  <!-- Content -->
+  <div id="hero-content">
+    <div id="hero-dest-tag">✈ &nbsp;Now showing: <span id="hero-dest-name">Santorini, Greece</span></div>
+    <h1 id="hero-headline">Craft Your<br/>Dream Holiday</h1>
+    <p id="hero-sub">Where whitewashed dreams meet the Aegean Sea</p>
+
+    <!-- Search bar -->
+    <a href="customize.html" class="hero-search no-underline">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#aaa" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="#aaa" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Where do you want to go?" readonly />
+      <span class="text-sm font-semibold px-5 py-2 rounded-full text-white flex-shrink-0" style="background:var(--green)">Explore</span>
+    </a>
+
+    <!-- Trust signals -->
+    <div class="trust-row flex items-center justify-center gap-4 mb-5 flex-wrap">
+      <span class="text-white/70 text-xs">✓ No booking fee</span>
+      <span class="text-white/35 text-xs">·</span>
+      <span class="text-white/70 text-xs">✓ Free cancellation</span>
+      <span class="text-white/35 text-xs">·</span>
+      <span class="text-white/70 text-xs">✓ 24/7 expert support</span>
+    </div>
+
+    <!-- Traveller chips -->
+    <p style="color:rgba(255,255,255,.65);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px">Who's travelling?</p>
+    <div id="chips-row" class="flex items-center justify-center flex-wrap">
+
+      <!-- Couple — rose pink -->
+      <a href="customize.html" class="tcard" style="background:linear-gradient(145deg,#f43f6e,#e11d48)">
+        <span class="tcard-icon">💑</span>
+        <span class="tcard-label">Couple</span>
+      </a>
+
+      <!-- Family — warm amber -->
+      <a href="customize.html" class="tcard" style="background:linear-gradient(145deg,#f97316,#ea580c)">
+        <span class="tcard-icon">👨‍👩‍👧‍👦</span>
+        <span class="tcard-label">Family</span>
+      </a>
+
+      <!-- Solo — ocean blue -->
+      <a href="customize.html" class="tcard" style="background:linear-gradient(145deg,#3b82f6,#1d4ed8)">
+        <span class="tcard-icon">🧳</span>
+        <span class="tcard-label">Solo</span>
+      </a>
+
+      <!-- Friends — vibrant violet -->
+      <a href="customize.html" class="tcard" style="background:linear-gradient(145deg,#a855f7,#7c3aed)">
+        <span class="tcard-icon">🧑‍🤝‍🧑</span>
+        <span class="tcard-label">Friends</span>
+      </a>
+
+      <!-- Honeymoon — deep teal-green -->
+      <a href="customize.html" class="tcard" style="background:linear-gradient(145deg,#09b367,#047857)">
+        <span class="tcard-icon">💍</span>
+        <span class="tcard-label">Honeymoon</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Slide dots -->
+  <div id="hero-dots"></div>
+
+  <!-- Scroll cue -->
+  <div id="hero-scroll-cue">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7 7 7-7" stroke="rgba(255,255,255,.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+</div>
+
+<!-- ── Trust Bar ── -->
+<div style="background:linear-gradient(135deg,#f0fff4 0%,#e8f7e8 100%);padding:28px 28px;text-align:center;border-top:1px solid #d1fae5">
+  <p class="font-paytone text-gray-900 text-xl mb-3">Plan your dream holiday with <span style="color:var(--green)">Happlore</span></p>
+  <div class="flex items-center justify-center gap-8 flex-wrap" style="max-width:600px;margin:0 auto">
+    <div style="text-align:center">
+      <p style="font-size:24px;font-weight:800;color:#1a1c22;margin:0">1,00,000+</p>
+      <p style="font-size:12px;color:#6b7280;margin:0">happy travellers</p>
+    </div>
+    <span class="w-px bg-gray-300 inline-block" style="height:32px"></span>
+    <div style="text-align:center">
+      <p style="font-size:24px;font-weight:800;color:#1a1c22;margin:0">60+</p>
+      <p style="font-size:12px;color:#6b7280;margin:0">destinations worldwide</p>
+    </div>
+    <span class="w-px bg-gray-300 inline-block" style="height:32px"></span>
+    <div style="text-align:center">
+      <p style="font-size:24px;font-weight:800;color:#1a1c22;margin:0">4.8 ★</p>
+      <p style="font-size:12px;color:#6b7280;margin:0">avg customer rating</p>
+    </div>
+    <span class="w-px bg-gray-300 inline-block" style="height:32px"></span>
+    <div style="text-align:center">
+      <p style="font-size:24px;font-weight:800;color:#1a1c22;margin:0">100%</p>
+      <p style="font-size:12px;color:#6b7280;margin:0">customised itineraries</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Trending Destinations ── -->
+<div class="section">
+  <div class="flex items-center justify-between mb-1">
+    <div><p class="section-label">Trending</p><h2 class="section-title">Trending Destinations</h2></div>
+    <span style="font-size:13px;font-weight:700;color:var(--green);cursor:pointer">View all →</span>
+  </div>
+  <div class="scroll-row">
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=400&q=80" alt="Switzerland"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Switzerland</p></div></a>
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=400&q=80" alt="Japan"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Japan</p></div></a>
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Dubai</p></div></a>
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400&q=80" alt="Singapore"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Singapore</p></div></a>
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&q=80" alt="Maldives"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Maldives</p></div></a>
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400&q=80" alt="Bali"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Bali</p></div></a>
+    <a href="customize.html" class="arch-card no-underline" style="width:155px;height:215px"><img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400&q=80" alt="Europe"/><div class="arch-overlay"><p class="text-white font-bold text-sm">Europe</p></div></a>
+  </div>
+</div>
+
+<!-- ── Seasons & Events ── -->
+<div style="border-top:1px solid #f0f0ec" class="section">
+  <div class="flex items-center justify-between mb-1">
+    <div><p class="section-label">Seasonal</p><h2 class="section-title">Seasons & Events</h2></div>
+    <span style="font-size:13px;font-weight:700;color:var(--green);cursor:pointer">View all →</span>
+  </div>
+  <div class="scroll-row">
+    <div class="dest-card" style="width:138px;height:104px"><img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-xs">Northern Lights</p></div></div>
+    <div class="dest-card" style="width:138px;height:104px"><img src="https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-xs">Cherry Blossom</p></div></div>
+    <div class="dest-card" style="width:138px;height:104px"><img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-xs">Wildlife Safari</p></div></div>
+    <div class="dest-card" style="width:138px;height:104px"><img src="https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-xs">Shopping Festival</p></div></div>
+    <div class="dest-card" style="width:138px;height:104px"><img src="https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-xs">Ski Season</p></div></div>
+  </div>
+</div>
+
+<!-- ── Visa-Free ── -->
+<div style="border-top:1px solid #f0f0ec" class="section">
+  <div class="flex items-center justify-between mb-1">
+    <div><p class="section-label">No Hassle</p><h2 class="section-title">Visa-Free Destinations</h2></div>
+    <span style="font-size:13px;font-weight:700;color:var(--green);cursor:pointer">View all →</span>
+  </div>
+  <div class="scroll-row">
+    <a href="customize.html" class="dest-card no-underline" style="width:158px;height:118px"><img src="https://images.unsplash.com/photo-1548013146-72479768bada?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-sm">Maldives</p></div></a>
+    <a href="customize.html" class="dest-card no-underline" style="width:158px;height:118px"><img src="https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-sm">Seychelles</p></div></a>
+    <a href="customize.html" class="dest-card no-underline" style="width:158px;height:118px"><img src="https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-sm">Malaysia</p></div></a>
+    <a href="customize.html" class="dest-card no-underline" style="width:158px;height:118px"><img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-sm">Thailand</p></div></a>
+    <a href="customize.html" class="dest-card no-underline" style="width:158px;height:118px"><img src="https://images.unsplash.com/photo-1559628129-67cf63b72248?w=300&q=80" alt=""/><div class="dest-overlay"><p class="text-white font-bold text-sm">Mauritius</p></div></a>
+  </div>
+</div>
+
+<!-- ── Packages by Duration ── -->
+<div style="border-top:1px solid #f0f0ec" class="section">
+  <div class="flex items-center gap-3 flex-wrap mb-4">
+    <h2 class="section-title">Packages by Duration</h2>
+    <span style="background:var(--green);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">5 Days</span>
+    <span style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">7 Days</span>
+    <span style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">10 Days</span>
+    <span style="border:1.5px solid var(--green);color:var(--green);border-radius:20px;font-size:11px;font-weight:700;padding:3px 12px;cursor:pointer">14+ Days</span>
+  </div>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Europe</p><p class="text-white/75 text-xs mt-0.5">From ₹75,000</p></div></a>
+    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Dubai</p><p class="text-white/75 text-xs mt-0.5">From ₹45,000</p></div></a>
+    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Bali</p><p class="text-white/75 text-xs mt-0.5">From ₹35,000</p></div></a>
+    <a href="customize.html" class="dest-card h-52 lg:h-60 no-underline block"><img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=500&q=80" class="w-full h-full object-cover" alt=""/><div class="dest-overlay flex-col"><p class="text-white font-bold">Maldives</p><p class="text-white/75 text-xs mt-0.5">From ₹60,000</p></div></a>
+  </div>
+</div>
+
+<!-- ── Love from the Gram ── -->
+<div style="background:#111827;padding:44px 28px">
+  <div style="max-width:1240px;margin:0 auto;text-align:center">
+    <h2 class="font-paytone text-white text-2xl lg:text-3xl mb-2">LOVE FROM THE GRAM ❤️</h2>
+    <div class="flex items-center justify-center gap-8 mb-7">
+      <span class="text-yellow-400">★★★★★</span><span class="text-white font-bold">4.9 Google</span>
+      <span class="text-green-400">★★★★★</span><span class="text-white font-bold">4.8 Trustpilot</span>
+    </div>
+    <div class="flex gap-4 overflow-x-auto justify-start lg:justify-center" style="scrollbar-width:none">
+      <div class="gram-phone" style="width:125px;height:220px"><img src="https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=200&q=80" class="w-full object-cover" style="height:160px" alt=""/><div class="p-2"><p class="text-white text-xs font-semibold">Santorini Family</p><p style="color:#09b367" class="text-xs mt-1">Verified ✓</p></div></div>
+      <div class="gram-phone" style="width:125px;height:220px;margin-top:24px"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=200&q=80" class="w-full object-cover" style="height:160px" alt=""/><div class="p-2"><p class="text-white text-xs font-semibold">Thailand Honeymoon</p><p style="color:#09b367" class="text-xs mt-1">Verified ✓</p></div></div>
+      <div class="gram-phone" style="width:125px;height:220px"><img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=200&q=80" class="w-full object-cover" style="height:160px" alt=""/><div class="p-2"><p class="text-white text-xs font-semibold">Paris Romance</p><p style="color:#09b367" class="text-xs mt-1">Verified ✓</p></div></div>
+      <div class="gram-phone" style="width:125px;height:220px;margin-top:24px"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&q=80" class="w-full object-cover" style="height:160px" alt=""/><div class="p-2"><p class="text-white text-xs font-semibold">Maldives Getaway</p><p style="color:#09b367" class="text-xs mt-1">Verified ✓</p></div></div>
+      <div class="gram-phone" style="width:125px;height:220px"><img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200&q=80" class="w-full object-cover" style="height:160px" alt=""/><div class="p-2"><p class="text-white text-xs font-semibold">Europe Road Trip</p><p style="color:#09b367" class="text-xs mt-1">Verified ✓</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Why Happlore ── -->
+<div style="background:linear-gradient(to bottom,#f0fff4,#e6f7e8);padding:36px 28px">
+  <div style="max-width:1240px;margin:0 auto">
+    <h2 class="text-xl font-bold text-gray-900 text-center">Why you should book with Happlore</h2>
+    <div class="why-grid">
+      <div class="why-card"><img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=80" class="w-full h-full object-cover absolute inset-0" alt=""/><div class="play-overlay"><div class="play-circle"><svg width="14" height="14" viewBox="0 0 24 24" fill="#09b367"><polygon points="5,3 19,12 5,21"/></svg></div></div><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);padding:8px 12px"><p class="text-white text-sm font-bold">Customisation</p></div></div>
+      <div class="why-card"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80" class="w-full h-full object-cover absolute inset-0" alt=""/><div class="play-overlay"><div class="play-circle"><svg width="14" height="14" viewBox="0 0 24 24" fill="#09b367"><polygon points="5,3 19,12 5,21"/></svg></div></div><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);padding:8px 12px"><p class="text-white text-sm font-bold">Expertise</p></div></div>
+      <div class="why-card"><img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&q=80" class="w-full h-full object-cover absolute inset-0" alt=""/><div class="play-overlay"><div class="play-circle"><svg width="14" height="14" viewBox="0 0 24 24" fill="#09b367"><polygon points="5,3 19,12 5,21"/></svg></div></div><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);padding:8px 12px"><p class="text-white text-sm font-bold">Service</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── App Banner ── -->
+<div class="section">
+  <div style="background:linear-gradient(135deg,#09b367 0%,#038c55 100%);border-radius:20px;padding:36px 40px">
+    <p style="color:#fde68a;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">📱 Now on Mobile</p>
+    <h3 class="font-paytone text-white text-2xl mb-2">Your best way<br/>to plan a trip!</h3>
+    <p class="text-white/80 text-sm mb-4 max-w-xs">Book on the go. Stay in touch with your travel expert.</p>
+    <div class="flex gap-3 items-center">
+      <button disabled class="bg-black/60 text-white/60 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed">🍎 Coming Soon</button>
+      <button disabled class="bg-black/60 text-white/60 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed">🤖 Coming Soon</button>
+    </div>
+    <p style="color:rgba(255,255,255,.5);font-size:11px;margin-top:10px">App launching soon — join our waitlist below ↓</p>
+  </div>
+</div>
+
+<!-- ── App Waitlist ── -->
+<div style="padding:32px 28px;text-align:center;border-top:1px solid #f0f0ec;background:#f8f8f4">
+  <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#09b367;margin-bottom:6px">📱 Be the First</p>
+  <p style="font-size:18px;font-weight:800;color:#1a1c22;margin-bottom:16px">Get early access to the Happlore app</p>
+  <div style="display:flex;align-items:center;gap:0;max-width:420px;margin:0 auto;border-radius:50px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.10);border:1.5px solid #e0e0e0;background:#fff">
+    <input type="email" id="waitlistEmail" placeholder="Enter your email" style="flex:1;padding:12px 20px;border:none;outline:none;font-family:Manrope,sans-serif;font-size:14px;color:#1a1c22;background:transparent"/>
+    <button onclick="joinWaitlist()" style="background:#09b367;color:#fff;border:none;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Join Waitlist</button>
+  </div>
+  <p id="waitlistMsg" style="display:none;color:#09b367;font-size:13px;font-weight:600;margin-top:10px">✅ You're on the list! We'll reach out soon.</p>
+</div>
+
+<!-- ── Footer ── -->
+<footer style="background:#0f172a;padding:44px 28px 28px">
+  <div style="max-width:1240px;margin:0 auto">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span style="font-family:'Inter','DM Sans','Manrope',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:-.3px">happlore</span><span style="color:#09b367;font-size:20px;line-height:1;margin-left:1px;font-weight:700">•</span>
+        </div>
+        <p class="text-gray-400 text-sm">Craft your holiday, your way.</p>
+      </div>
+      <div><h4 class="text-white font-semibold text-sm mb-3">Destinations</h4><ul class="space-y-2 text-gray-400 text-sm list-none p-0"><li>Europe</li><li>Dubai</li><li>Bali</li><li>Japan</li></ul></div>
+      <div><h4 class="text-white font-semibold text-sm mb-3">Travel Types</h4><ul class="space-y-2 text-gray-400 text-sm list-none p-0"><li>Honeymoon</li><li>Family</li><li>Solo</li><li>Adventure</li></ul></div>
+      <div><h4 class="text-white font-semibold text-sm mb-3">Support</h4><ul class="space-y-2 text-gray-400 text-sm list-none p-0"><li>About Us</li><li>Help Centre</li><li>Terms</li><li>Privacy</li></ul></div>
+    </div>
+    <div class="border-t border-gray-800 pt-5 flex items-center justify-between flex-wrap gap-4">
+      <p class="text-gray-500 text-sm">© 2025 Happlore. All rights reserved.</p>
+      <div class="flex gap-5">
+        <span class="text-gray-500 text-sm cursor-pointer hover:text-white">Instagram</span>
+        <span class="text-gray-500 text-sm cursor-pointer hover:text-white">Facebook</span>
+        <span class="text-gray-500 text-sm cursor-pointer hover:text-white">Twitter</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  // ── Cinematic Slideshow Hero ──────────────────────────────────
+  const slides   = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('hero-dots');
+  const destName = document.getElementById('hero-dest-name');
+  const heroSub  = document.getElementById('hero-sub');
+  const destTag  = document.getElementById('hero-dest-tag');
+
+  if (!slides.length) return;
+
+  let current  = 0;
+  let timer    = null;
+  const DELAY  = 6000; // ms per slide
+
+  // Build dots
+  const dots = slides.map((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+    return d;
+  });
+
+  function goTo(idx) {
+    if (idx === current) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    dots[current].classList.remove('active');
+
+    const prev = current;
+    setTimeout(() => { slides[prev].classList.remove('exit'); }, 1500);
+
+    current = (idx + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+
+    // Update text with subtle fade
+    destTag.style.animation = 'none';
+    destTag.offsetHeight; // reflow
+    destTag.style.animation = 'tagFadeIn .6s ease both';
+    destName.textContent = slides[current].dataset.dest;
+    heroSub.textContent  = slides[current].dataset.sub;
+
+    resetTimer();
+  }
+
+  function next() { goTo(current + 1); }
+
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(next, DELAY);
+  }
+
+  // Init
+  slides[0].classList.add('active');
+  resetTimer();
+
+  // Pause on hover
+  const hero = document.getElementById('hero');
+  hero.addEventListener('mouseenter', () => clearInterval(timer));
+  hero.addEventListener('mouseleave', resetTimer);
+})();
+</script>
+
+<!-- ── WhatsApp Sticky CTA ── -->
+<a id="wa-btn" href="https://wa.me/919999999999?text=Hi%2C%20I%27d%20like%20to%20plan%20a%20holiday%20with%20Happlore%21" target="_blank" rel="noopener noreferrer"
+  style="
+    position:fixed; bottom:24px; right:24px; z-index:9999;
+    display:flex; align-items:center; gap:10px;
+    background:#25D366; color:#fff;
+    border-radius:50px; padding:12px 20px 12px 14px;
+    box-shadow:0 4px 20px rgba(37,211,102,.45);
+    text-decoration:none; font-family:Manrope,sans-serif;
+    font-size:14px; font-weight:700;
+    transition:transform .2s, box-shadow .2s;
+  "
+  onmouseover="this.style.transform='scale(1.06)';this.style.boxShadow='0 6px 28px rgba(37,211,102,.55)'"
+  onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(37,211,102,.45)'"
+>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+  Chat with Expert
+</a>
+
+<!-- Trust badge near WhatsApp -->
+<div id="wa-trust" style="
+  position:fixed; bottom:76px; right:24px; z-index:9998;
+  background:#fff; border-radius:10px; padding:8px 14px;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
+  font-family:Manrope,sans-serif; font-size:11px; color:#6b7280;
+  display:flex; align-items:center; gap:6px;
+  animation:wa-pop .4s ease 2s both;
+">
+  <span style="color:#09b367;font-size:14px">●</span>
+  <span><b style="color:#1a1c22">12 experts</b> online now · Avg reply in 3 min</span>
+  <span id="wa-trust-close" onclick="document.getElementById('wa-trust').style.display='none'" style="cursor:pointer;margin-left:4px;color:#bbb;font-size:14px">✕</span>
+</div>
+
+<style>
+@keyframes wa-pop { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+</style>
+
+<script>
+function joinWaitlist() {
+  const email = document.getElementById('waitlistEmail').value;
+  const msg = document.getElementById('waitlistMsg');
+  if (!email || !email.includes('@')) {
+    document.getElementById('waitlistEmail').style.border = '1.5px solid #e11d48';
+    return;
+  }
+  document.getElementById('waitlistEmail').style.border = '';
+  msg.style.display = 'block';
+  document.getElementById('waitlistEmail').value = '';
+}
+</script>
 
 </body>
 </html>

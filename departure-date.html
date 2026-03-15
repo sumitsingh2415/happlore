@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Plan your perfect customised holiday with Happlore. Expert-guided packages to 60+ destinations worldwide." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – When Is Your Departure Date?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .page-content {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 940px;
+      margin: 0 auto;
+      padding: 48px 24px 120px;
+      text-align: center;
+    }
+    .page-content h1 {
+      font-size: 26px; font-weight: 700;
+      color: var(--dark); margin: 0 0 32px;
+    }
+
+    /* ── Calendar card ── */
+    .cal-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e8e8e2;
+      padding: 28px 16px 32px;
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+    }
+
+    /* Nav arrow buttons */
+    .cal-nav-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1.5px solid #e0e0d8;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      color: var(--green);
+    }
+    .cal-nav-btn:hover { background: #f0fdf6; border-color: var(--green); }
+    .cal-nav-btn.prev { left: -18px; }
+    .cal-nav-btn.next { right: -18px; }
+    .cal-nav-btn svg { flex-shrink: 0; }
+
+    /* ── Month columns ── */
+    .cal-months {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      width: 100%;
+    }
+    .cal-month {
+      padding: 0 12px;
+    }
+    .cal-month + .cal-month {
+      border-left: 1px solid #f0f0ec;
+    }
+
+    .cal-month-header {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .cal-month-header .year {
+      color: #9ca3af;
+      font-weight: 500;
+    }
+    .cal-month-header .dot {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: #d1d5db;
+    }
+
+    /* Day-of-week header row */
+    .cal-dow-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 8px;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #9ca3af;
+      padding: 4px 0;
+    }
+
+    /* Date grid */
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      row-gap: 4px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--dark);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .12s, color .12s;
+      margin: 1px;
+      position: relative;
+    }
+    .cal-day:hover:not(.past):not(.empty) {
+      background: #e8faf1;
+      color: var(--green);
+    }
+    .cal-day.past {
+      color: #d1d5db;
+      cursor: default;
+      pointer-events: none;
+    }
+    .cal-day.empty {
+      pointer-events: none;
+    }
+    /* Today marker */
+    .cal-day.today {
+      color: var(--green);
+      font-weight: 700;
+    }
+    .cal-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    /* Selected date */
+    .cal-day.selected {
+      background: var(--green) !important;
+      color: #fff !important;
+      font-weight: 700;
+    }
+    .cal-day.selected::after { display: none; }
+  </style>
+</head>
+<body class="flow-page">
+
+  <div id="flow-nav-mount"></div>
+
+  <main class="flow-body">
+    <svg class="map-watermark" viewBox="0 0 1000 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M80 80L100 70L140 75L160 90L175 110L180 140L170 160L150 175L110 195L95 230L75 235L60 200L55 180L65 130Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M440 55L475 58L495 72L500 90L465 105L435 95Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M680 75L760 85L760 125L682 100Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+    </svg>
+
+    <div class="page-content">
+      <h1>When is your departure date?</h1>
+
+      <div style="position:relative">
+        <!-- Prev button -->
+        <button class="cal-nav-btn prev" onclick="shiftMonths(-1)" id="prevBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- Calendar card -->
+        <div class="cal-card">
+          <div class="cal-months" id="calMonths"></div>
+        </div>
+
+        <!-- Next button -->
+        <button class="cal-nav-btn next" onclick="shiftMonths(1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <div id="testimonial-mount"></div>
+
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/testimonial.js"></script>
+
+  <script>
+    // Guards
+    if (!HapploreState.get('dest'))           window.location.href = 'customize.html';
+    if (!HapploreState.get('traveller'))      window.location.href = 'travellers.html';
+    if (!HapploreState.get('duration'))       window.location.href = 'duration.html';
+    if (!HapploreState.get('departureCity'))  window.location.href = 'departure-city.html';
+
+    FlowNav.render({ currentStep: 'departure-date' });
+
+    Testimonial.render({
+      avatar: 'B', avatarBg: '#5b4fcf',
+      text: '"PYT truly helped us from A to Z in planning and executing our recent Europe trip covering Switzerland, Finland, and Paris. Everything was taken care of..."',
+      name: 'Bharani Tharan, Switzerland',
+      rating: '4.6 / 5', reviewCount: '8400+',
+    });
+
+    // ── Calendar state ──
+    const today      = new Date();
+    today.setHours(0, 0, 0, 0);
+    let   startMonth = new Date(today.getFullYear(), today.getMonth(), 1); // first of current month
+    let   selected   = HapploreState.get('departureDate')
+                         ? new Date(HapploreState.get('departureDate'))
+                         : null;
+
+    const DAYS    = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const MONTHS  = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+
+    // ── Build one month ──
+    function buildMonth(year, month) {
+      const firstDay   = new Date(year, month, 1).getDay(); // 0=Sun
+      const daysInMonth= new Date(year, month + 1, 0).getDate();
+
+      // DOW header
+      const dowHTML = DAYS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+      // Empty cells before day 1
+      let cells = [];
+      for (let i = 0; i < firstDay; i++) cells.push(`<div class="cal-day empty"></div>`);
+
+      // Day cells
+      for (let d = 1; d <= daysInMonth; d++) {
+        const thisDate = new Date(year, month, d);
+        const isPast   = thisDate < today;
+        const isToday  = thisDate.getTime() === today.getTime();
+        const isSel    = selected && thisDate.getTime() === selected.getTime();
+
+        let cls = 'cal-day';
+        if (isPast)   cls += ' past';
+        if (isToday)  cls += ' today';
+        if (isSel)    cls += ' selected';
+
+        const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        cells.push(`<div class="${cls}" data-date="${ds}" onclick="selectDate('${ds}')">${d}</div>`);
+      }
+
+      return `
+        <div class="cal-month">
+          <div class="cal-month-header">
+            <span>${MONTHS[month]}</span>
+            <div class="dot"></div>
+            <span class="year">${year}</span>
+          </div>
+          <div class="cal-dow-row">${dowHTML}</div>
+          <div class="cal-days-grid">${cells.join('')}</div>
+        </div>`;
+    }
+
+    // ── Render 3 months ──
+    function renderCalendar() {
+      const container = document.getElementById('calMonths');
+      let html = '';
+      for (let i = 0; i < 3; i++) {
+        const d = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
+        html += buildMonth(d.getFullYear(), d.getMonth());
+      }
+      container.innerHTML = html;
+
+      // Disable prev button if already at current month
+      const prevBtn = document.getElementById('prevBtn');
+      const isCurrentMonth = startMonth.getFullYear() === today.getFullYear() &&
+                             startMonth.getMonth()    === today.getMonth();
+      prevBtn.style.opacity    = isCurrentMonth ? '0.3' : '1';
+      prevBtn.style.pointerEvents = isCurrentMonth ? 'none' : 'auto';
+    }
+
+    // ── Navigate months ──
+    function shiftMonths(delta) {
+      const next = new Date(startMonth.getFullYear(), startMonth.getMonth() + delta, 1);
+      // Don't go before current month
+      const minMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      if (next < minMonth) return;
+      startMonth = next;
+      renderCalendar();
+    }
+
+    // ── Select a date ──
+    function selectDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      if (d < today) return;
+      selected = d;
+      HapploreState.set('departureDate', dateStr);
+      renderCalendar();
+      // Navigate to next step after brief moment
+      setTimeout(() => { window.location.href = 'cities.html'; }, 380);
+    }
+
+    // ── Initial render ──
+    renderCalendar();
+  </script>
+</body>
+</html>

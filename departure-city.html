@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Plan your perfect customised holiday with Happlore. Expert-guided packages to 60+ destinations worldwide." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – Where Are You Travelling From?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .page-content {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 620px;
+      margin: 0 auto;
+      padding: 48px 24px 140px;
+    }
+    .page-content h1 {
+      font-size: 26px; font-weight: 700;
+      color: var(--dark); margin: 0 0 28px;
+      text-align: center;
+    }
+
+    /* ── Airport search bar ── */
+    .airport-search-wrap {
+      position: relative; margin-bottom: 6px;
+    }
+    .airport-search-bar {
+      display: flex; align-items: center;
+      background: #fff;
+      border: 2px solid var(--green);
+      border-radius: 10px;
+      padding: 14px 18px; gap: 12px;
+    }
+    .airport-search-bar input {
+      flex: 1; border: none; outline: none;
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px; color: var(--dark);
+      background: transparent;
+    }
+    .airport-search-bar input::placeholder { color: #aab0bc; font-size: 15px; }
+    .search-clear-btn {
+      display: none; background: none; border: none;
+      cursor: pointer; padding: 0; flex-shrink: 0;
+      align-items: center;
+    }
+
+    /* ── Airport list ── */
+    .airport-list {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      margin-top: 8px;
+    }
+    .airport-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 17px 22px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0ec;
+      transition: background .14s;
+    }
+    .airport-row:last-child { border-bottom: none; }
+    .airport-row:hover { background: #f7fdf9; }
+    .airport-row.selected { background: #f0fdf6; }
+
+    .airport-city {
+      font-size: 15px; font-weight: 500; color: var(--dark);
+    }
+    .airport-code {
+      font-size: 13px; font-weight: 700;
+      color: #9ca3af; letter-spacing: .04em;
+    }
+
+    /* Checkmark on selected */
+    .airport-check {
+      display: none; color: var(--green);
+    }
+    .airport-row.selected .airport-check { display: block; }
+    .airport-row.selected .airport-code { color: var(--green); }
+
+    /* No results */
+    .no-results {
+      padding: 20px 22px; font-size: 14px; color: #999; text-align: center;
+    }
+
+    /* Section label above the list */
+    .list-section-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: #9ca3af; padding: 14px 22px 8px;
+      border-bottom: 1px solid #f0f0ec;
+    }
+  </style>
+</head>
+<body class="flow-page">
+
+  <!-- Nav injected by nav.js -->
+  <div id="flow-nav-mount"></div>
+
+  <main class="flow-body">
+    <!-- World map watermark -->
+    <svg class="map-watermark" viewBox="0 0 1000 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M80 80L100 70L140 75L160 90L175 110L180 140L170 160L150 175L110 195L95 230L75 235L60 200L55 180L65 130Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M440 55L475 58L495 72L500 90L465 105L435 95Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M450 130L510 140L520 195L490 280L432 215L440 160Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M680 75L760 85L760 125L682 100Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+    </svg>
+
+    <div class="page-content">
+      <h1>Where are you travelling from?</h1>
+
+      <!-- Search -->
+      <div class="airport-search-wrap">
+        <div class="airport-search-bar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="8" stroke="#aab0bc" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke="#aab0bc" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input id="airportSearch" type="text" placeholder="Search airports" autocomplete="off" />
+          <button id="clearBtn" class="search-clear-btn" onclick="clearSearch()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#bbb" stroke-width="1.5"/>
+              <path d="M15 9l-6 6M9 9l6 6" stroke="#bbb" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Airport list -->
+      <div class="airport-list" id="airportList"></div>
+    </div>
+  </main>
+
+  <!-- Testimonial strip -->
+  <div id="testimonial-mount"></div>
+
+  <!-- Shared JS -->
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/testimonial.js"></script>
+
+  <script>
+    // Guards
+    if (!HapploreState.get('dest'))       window.location.href = 'customize.html';
+    if (!HapploreState.get('traveller'))  window.location.href = 'travellers.html';
+    if (!HapploreState.get('duration'))   window.location.href = 'duration.html';
+
+    // Render shared components
+    FlowNav.render({ currentStep: 'departure-city' });
+
+    Testimonial.render({
+      avatar: 'B', avatarBg: '#5b4fcf',
+      text: '"PYT truly helped us from A to Z in planning and executing our recent Europe trip covering Switzerland, Finland, and Paris. Everything was taken care of..."',
+      name: 'Bharani Tharan, Switzerland',
+      rating: '4.6 / 5', reviewCount: '8400+',
+    });
+
+    // ── Airport database ──
+    // TO REPLACE: swap search() with fetch('/api/airports?q=...')
+    const AIRPORTS = [
+      // India — shown by default
+      { city: 'Bengaluru',   code: 'BLR', country: 'India', featured: true  },
+      { city: 'Chennai',     code: 'MAA', country: 'India', featured: true  },
+      { city: 'New Delhi',   code: 'DEL', country: 'India', featured: true  },
+      { city: 'Mumbai',      code: 'BOM', country: 'India', featured: true  },
+      { city: 'Hyderabad',   code: 'HYD', country: 'India', featured: true  },
+      { city: 'Trivandrum',  code: 'TRV', country: 'India', featured: true  },
+      { city: 'Ahmedabad',   code: 'AMD', country: 'India', featured: true  },
+      { city: 'Kolkata',     code: 'CCU', country: 'India', featured: true  },
+      { city: 'Kochi',       code: 'COK', country: 'India', featured: true  },
+      { city: 'Coimbatore',  code: 'CJB', country: 'India', featured: true  },
+      { city: 'Jaipur',      code: 'JAI', country: 'India', featured: true  },
+      { city: 'Pune',        code: 'PNQ', country: 'India', featured: true  },
+      { city: 'Goa',         code: 'GOI', country: 'India', featured: true  },
+      { city: 'Guwahati',    code: 'GAU', country: 'India', featured: false },
+      { city: 'Nagpur',      code: 'NAG', country: 'India', featured: false },
+      { city: 'Bhubaneswar', code: 'BBI', country: 'India', featured: false },
+      { city: 'Chandigarh',  code: 'IXC', country: 'India', featured: false },
+      { city: 'Lucknow',     code: 'LKO', country: 'India', featured: false },
+      { city: 'Patna',       code: 'PAT', country: 'India', featured: false },
+      { city: 'Varanasi',    code: 'VNS', country: 'India', featured: false },
+      { city: 'Indore',      code: 'IDR', country: 'India', featured: false },
+      { city: 'Mangaluru',   code: 'IXE', country: 'India', featured: false },
+      { city: 'Srinagar',    code: 'SXR', country: 'India', featured: false },
+      // International
+      { city: 'Dubai',       code: 'DXB', country: 'UAE',         featured: false },
+      { city: 'Singapore',   code: 'SIN', country: 'Singapore',   featured: false },
+      { city: 'Kuala Lumpur',code: 'KUL', country: 'Malaysia',    featured: false },
+      { city: 'London',      code: 'LHR', country: 'UK',          featured: false },
+      { city: 'Frankfurt',   code: 'FRA', country: 'Germany',     featured: false },
+      { city: 'Paris',       code: 'CDG', country: 'France',      featured: false },
+      { city: 'Bangkok',     code: 'BKK', country: 'Thailand',    featured: false },
+      { city: 'Colombo',     code: 'CMB', country: 'Sri Lanka',   featured: false },
+      { city: 'Kathmandu',   code: 'KTM', country: 'Nepal',       featured: false },
+    ];
+
+    // Search function — replace with API later
+    function searchAirports(q) {
+      if (!q) return AIRPORTS.filter(a => a.featured);
+      const lower = q.toLowerCase();
+      return AIRPORTS.filter(a =>
+        a.city.toLowerCase().includes(lower) ||
+        a.code.toLowerCase().includes(lower) ||
+        a.country.toLowerCase().includes(lower)
+      );
+    }
+
+    // ── Render list ──
+    function renderList(airports, showLabel = false) {
+      const list = document.getElementById('airportList');
+      const saved = HapploreState.get('departureCity');
+
+      if (!airports.length) {
+        list.innerHTML = `<div class="no-results">No airports found. Try a different search.</div>`;
+        return;
+      }
+
+      const labelHTML = showLabel
+        ? `<div class="list-section-label">Popular departure cities</div>`
+        : '';
+
+      const rowsHTML = airports.map(a => {
+        const isSelected = saved && saved.code === a.code;
+        return `
+          <div class="airport-row ${isSelected ? 'selected' : ''}"
+               onclick="selectAirport('${a.city}', '${a.code}', '${a.country}')">
+            <span class="airport-city">${a.city}, <span class="airport-code">${a.code}</span></span>
+            <svg class="airport-check" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12l5 5L20 7" stroke="#09b367" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>`;
+      }).join('');
+
+      list.innerHTML = labelHTML + rowsHTML;
+    }
+
+    // ── Select airport ──
+    function selectAirport(city, code, country) {
+      HapploreState.set('departureCity', { city, code, country });
+
+      // Visual feedback
+      document.querySelectorAll('.airport-row').forEach(r => r.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      // Update search bar to show selection
+      document.getElementById('airportSearch').value = `${city}, ${code}`;
+      document.getElementById('clearBtn').style.display = 'flex';
+
+      // Advance to next step
+      setTimeout(() => { window.location.href = 'departure-date.html'; }, 300);
+    }
+
+    // ── Clear ──
+    function clearSearch() {
+      document.getElementById('airportSearch').value = '';
+      document.getElementById('clearBtn').style.display = 'none';
+      renderList(AIRPORTS.filter(a => a.featured), true);
+    }
+
+    // ── Search input listener ──
+    document.getElementById('airportSearch').addEventListener('input', function () {
+      const q = this.value.trim();
+      document.getElementById('clearBtn').style.display = q ? 'flex' : 'none';
+      renderList(searchAirports(q), !q);
+    });
+
+    // ── Initial render ──
+    const savedCity = HapploreState.get('departureCity');
+    if (savedCity) {
+      document.getElementById('airportSearch').value = `${savedCity.city}, ${savedCity.code}`;
+      document.getElementById('clearBtn').style.display = 'flex';
+    }
+    renderList(AIRPORTS.filter(a => a.featured), true);
+  </script>
+</body>
+</html>

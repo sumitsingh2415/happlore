@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Plan your perfect customised holiday with Happlore. Expert-guided packages to 60+ destinations worldwide." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happlore – Pick Your Destination</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .flow-headline {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 48px 24px 24px;
+    }
+    .flow-headline h1 {
+      font-size: 30px; font-weight: 700;
+      color: var(--dark); letter-spacing: -.4px; margin: 0;
+    }
+    .cards-section {
+      position: relative; z-index: 1;
+      padding: 0 32px 140px;
+    }
+    .cards-track {
+      display: flex; gap: 16px;
+      overflow-x: auto;
+      padding: 6px 2px 14px;
+      scrollbar-width: none;
+    }
+    .cards-track::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="flow-page">
+
+  <!-- Nav injected by nav.js -->
+  <div id="flow-nav-mount"></div>
+
+  <main class="flow-body">
+    <!-- World map watermark -->
+    <svg class="map-watermark" viewBox="0 0 1000 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M80 80L100 70L140 75L160 90L175 110L180 140L170 160L150 175L110 195L95 230L75 235L60 200L55 180L65 130Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M175 250L215 245L240 285L245 315L225 370L185 380L160 335L158 305Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M440 55L475 58L495 72L500 90L465 105L435 95Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M450 130L510 140L520 195L490 280L432 215L440 160Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M580 120L625 135L615 175L575 165Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M680 75L760 85L760 125L682 100Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+      <path d="M710 280L808 285L818 335L706 300Z" stroke="#09b367" stroke-width="1.2" fill="none"/>
+    </svg>
+
+    <!-- Headline -->
+    <div class="flow-headline">
+      <h1>What's <span class="font-script" style="color:var(--green);font-size:36px">your pick</span> for your next vacation</h1>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-input-row">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="#09b367" stroke-width="2"/>
+          <path d="M21 21l-4.35-4.35" stroke="#09b367" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input id="searchInput" type="text" placeholder="Pick your destination" autocomplete="off" />
+        <button id="clearBtn" class="search-clear-btn" onclick="clearSearch()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#bbb" stroke-width="1.5"/>
+            <path d="M15 9l-6 6M9 9l6 6" stroke="#bbb" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="search-dropdown" id="searchDropdown"></div>
+    </div>
+
+    <!-- Destination cards -->
+    <div class="cards-section">
+      <div class="cards-track" id="cardsTrack">
+
+        <div class="dest-arch-card" onclick="selectCard('Switzerland', this)">
+          <img src="https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=600&q=85" alt="Switzerland"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Alpine Views in</p><p class="card-title">Switzerland</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Japan', this)">
+          <img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&q=85" alt="Japan"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Land of Rising Sun</p><p class="card-title">JAPAN</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Dubai', this)">
+          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=85" alt="Dubai"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">The City of Life</p><p class="card-title script">Dubai</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Singapore', this)">
+          <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&q=85" alt="Singapore"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">The Lion City</p><p class="card-title">Singapore</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Vietnam', this)">
+          <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=85" alt="Vietnam"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Land of Ascending Dragon</p><p class="card-title">Vietnam</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Maldives', this)">
+          <img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=85" alt="Maldives"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Create Memories in</p><p class="card-title script">Maldives</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Europe', this)">
+          <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600&q=85" alt="Europe"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Old World Charm</p><p class="card-title">Europe</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Bali', this)">
+          <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=85" alt="Bali"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Island of the Gods</p><p class="card-title script">Bali</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('Thailand', this)">
+          <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=600&q=85" alt="Thailand"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Land of Smiles</p><p class="card-title">Thailand</p></div>
+        </div>
+
+        <div class="dest-arch-card" onclick="selectCard('New Zealand', this)">
+          <img src="https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=600&q=85" alt="New Zealand"/>
+          <div class="card-gradient"></div>
+          <div class="card-text"><p class="card-subtitle">Middle Earth</p><p class="card-title">New Zealand</p></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Testimonial strip injected by testimonial.js -->
+  <div id="testimonial-mount"></div>
+
+  <!-- Shared JS -->
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/destinations.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/testimonial.js"></script>
+
+  <script>
+    // ── Render shared components ──
+    FlowNav.render({ currentStep: 'destination' });
+
+    Testimonial.render({
+      avatar: 'b', avatarBg: '#7c3aed',
+      text: '"My Maldives trip through Happlore was a fantastic journey. Unforgettable experience for me and my wife. We enjoyed every bit of the service..."',
+      name: 'bhushan desale, Maldives',
+      rating: '4.6 / 5', reviewCount: '8400+',
+    });
+
+    // ── Restore previous selection ──
+    const savedDest = HapploreState.get('dest');
+    if (savedDest) {
+      document.getElementById('searchInput').value = savedDest;
+      document.getElementById('clearBtn').style.display = 'flex';
+      highlightCard(savedDest);
+    }
+
+    // ── Card selection ──
+    function selectCard(dest, el) {
+      HapploreState.set('dest', dest);
+      document.querySelectorAll('.dest-arch-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('searchInput').value = dest;
+      document.getElementById('clearBtn').style.display = 'flex';
+      // Advance to next step after brief highlight
+      setTimeout(() => { window.location.href = 'travellers.html'; }, 350);
+    }
+
+    function highlightCard(dest) {
+      document.querySelectorAll('.dest-arch-card').forEach(c => {
+        const name = c.querySelector('.card-title').textContent.trim();
+        c.classList.toggle('selected', name.toLowerCase() === dest.toLowerCase());
+      });
+    }
+
+    // ── Search dropdown ──
+    const searchInput = document.getElementById('searchInput');
+    const dropdown    = document.getElementById('searchDropdown');
+    const clearBtn    = document.getElementById('clearBtn');
+
+    searchInput.addEventListener('input', function () {
+      const q = this.value.trim();
+      clearBtn.style.display = q ? 'flex' : 'none';
+      if (q.length >= 1) {
+        renderDropdown(Destinations.search(q), q);
+      } else {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    function renderDropdown(results, query) {
+      if (!results.length) {
+        dropdown.innerHTML = `<div class="dropdown-empty">No results for "<b>${query}</b>"</div>`;
+      } else {
+        dropdown.innerHTML = results.map(d => {
+          const display = d.country ? `${d.name}, ${d.country}` : d.name;
+          return `
+            <div class="dropdown-row" onclick="selectFromDropdown('${display}', '${d.name}')">
+              <span class="dropdown-dest-name">${display}</span>
+              <span class="dropdown-booked">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="#888" stroke-width="1.6"/>
+                  <path d="M12 7v5l3 3" stroke="#888" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                Booked ${d.bookedAgo}
+              </span>
+            </div>`;
+        }).join('');
+      }
+      dropdown.style.display = 'block';
+    }
+
+    function selectFromDropdown(displayName, destName) {
+      HapploreState.set('dest', destName);
+      searchInput.value = displayName;
+      clearBtn.style.display = 'flex';
+      dropdown.style.display = 'none';
+      highlightCard(destName);
+      setTimeout(() => { window.location.href = 'travellers.html'; }, 350);
+    }
+
+    function clearSearch() {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      dropdown.style.display = 'none';
+      document.querySelectorAll('.dest-arch-card').forEach(c => c.classList.remove('selected'));
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', e => {
+      if (!document.querySelector('.search-wrap').contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
