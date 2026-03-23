@@ -1,0 +1,161 @@
+// Happlore — Prisma Schema
+// Phase 1: Users, Leads, Waitlist, Notifications
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  TRAVELLER
+  EXPERT
+  ADMIN
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  BOOKED
+  CANCELLED
+}
+
+enum TravellerType {
+  COUPLE
+  FAMILY
+  SOLO
+  FRIENDS
+  HONEYMOON
+}
+
+enum NotificationChannel {
+  EMAIL
+  WHATSAPP
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id          String   @id @default(uuid())
+  email       String?  @unique
+  phone       String?  @unique
+  name        String?
+  role        Role     @default(TRAVELLER)
+  avatarUrl   String?
+  isVerified  Boolean  @default(false)
+  passwordHash String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  otpTokens   OtpToken[]
+  leads       Lead[]       @relation("UserLeads")
+  assignedLeads Lead[]     @relation("ExpertLeads")
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model OtpToken {
+  id        String   @id @default(uuid())
+  userId    String
+  otp       String
+  channel   NotificationChannel
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("otp_tokens")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Lead {
+  id              String        @id @default(uuid())
+  status          LeadStatus    @default(NEW)
+  travellerType   TravellerType?
+  destination     String?
+  departureCity   String?
+  departureDate   DateTime?
+  returnDate      DateTime?
+  durationDays    Int?
+  numAdults       Int           @default(1)
+  numChildren     Int           @default(0)
+  budgetInr       BigInt?
+  activities      String[]      @default([])
+  phone           String?
+  email           String?
+  whatsappOptIn   Boolean       @default(true)
+  notes           String?
+
+  // Source tracking
+  source          String?       @default("web")
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+
+  // Relations
+  userId          String?
+  assignedExpertId String?
+  user            User?         @relation("UserLeads", fields: [userId], references: [id])
+  assignedExpert  User?         @relation("ExpertLeads", fields: [assignedExpertId], references: [id])
+  notifications   Notification[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("leads")
+}
+
+model Waitlist {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  source    String   @default("web")
+  createdAt DateTime @default(now())
+
+  @@map("waitlist")
+}
+
+model Notification {
+  id        String              @id @default(uuid())
+  userId    String?
+  leadId    String?
+  channel   NotificationChannel
+  status    NotificationStatus  @default(PENDING)
+  subject   String?
+  body      String
+  sentAt    DateTime?
+  error     String?
+  createdAt DateTime            @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+  lead Lead? @relation(fields: [leadId], references: [id])
+
+  @@map("notifications")
+}

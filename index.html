@@ -515,6 +515,7 @@
 
 <script src="assets/js/state.js"></script>
 <script src="assets/js/duration.js"></script>
+<script src="assets/js/api.js"></script>
 <script>
 (function() {
   // ── Cinematic Slideshow Hero ──────────────────────────────────
@@ -658,16 +659,35 @@
 </style>
 
 <script>
-function joinWaitlist() {
-  const email = document.getElementById('waitlistEmail').value;
-  const msg = document.getElementById('waitlistMsg');
+async function joinWaitlist() {
+  const emailEl = document.getElementById('waitlistEmail');
+  const msgEl   = document.getElementById('waitlistMsg');
+  const btn     = document.querySelector('button[onclick="joinWaitlist()"]');
+  const email   = emailEl.value.trim();
+
   if (!email || !email.includes('@')) {
-    document.getElementById('waitlistEmail').style.border = '1.5px solid #e11d48';
+    emailEl.style.border = '1.5px solid #e11d48';
     return;
   }
-  document.getElementById('waitlistEmail').style.border = '';
-  msg.style.display = 'block';
-  document.getElementById('waitlistEmail').value = '';
+  emailEl.style.border = '';
+
+  // Show loading state
+  const origText = btn.textContent;
+  btn.textContent = 'Joining...';
+  btn.disabled = true;
+
+  try {
+    await HapploreAPI.joinWaitlist(email);
+    msgEl.style.display = 'block';
+    emailEl.value = '';
+  } catch {
+    // Fail gracefully — still show success to avoid friction
+    msgEl.style.display = 'block';
+    emailEl.value = '';
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
 }
 </script>
 

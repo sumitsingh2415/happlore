@@ -387,6 +387,7 @@
 </div>
 
 <script src="assets/js/state.js"></script>
+<script src="assets/js/api.js"></script>
 <script>
   // ── Read state ──
   const dest      = HapploreState.get('dest') || 'Switzerland';
@@ -395,6 +396,40 @@
   const traveller = HapploreState.get('traveller') || 'couple';
   const depCity   = HapploreState.get('departureCity') || { city: 'Bengaluru', code: 'BLR' };
   const depDate   = HapploreState.get('departureDate');
+
+  // ── Auto-submit lead (once per session) ──────────────────────────────────
+  // Only fires when the user reaches results for the first time this session.
+  (async () => {
+    if (HapploreState.get('leadSubmitted')) return; // already submitted
+    try {
+      const travellerMap = {
+        couple: 'COUPLE', family: 'FAMILY',
+        solo: 'SOLO', friends: 'FRIENDS', honeymoon: 'HONEYMOON',
+      };
+      const parsedDuration = (() => {
+        const m = (duration || '').match(/(\d+)/);
+        return m ? parseInt(m[1]) : undefined;
+      })();
+
+      await HapploreAPI.submitLead({
+        destination: dest,
+        departureCity: depCity?.city || depCity,
+        departureDate: depDate || undefined,
+        durationDays: parsedDuration,
+        travellerType: travellerMap[traveller] || undefined,
+        activities: HapploreState.get('activities') || [],
+        whatsappOptIn: true,
+      });
+
+      // Mark as submitted so we don't re-fire on Back navigation
+      HapploreState.set('leadSubmitted', true);
+      console.log('[Happlore] Lead submitted ✅');
+    } catch (err) {
+      // Silent fail — never block the user experience
+      console.warn('[Happlore] Lead submission failed (non-blocking):', err.message);
+    }
+  })();
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Parse duration
   function parseDur(d) { const m = d.match(/(\d+)[–\-](\d+)/); return m ? { min:parseInt(m[1]), max:parseInt(m[2]) } : {min:6,max:8}; }
